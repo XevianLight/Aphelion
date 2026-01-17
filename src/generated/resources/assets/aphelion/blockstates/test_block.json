@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "aphelion:block/test_block"
+    }
+  }
+}

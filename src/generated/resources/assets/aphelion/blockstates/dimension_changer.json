@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "aphelion:block/dimension_changer"
+    }
+  }
+}

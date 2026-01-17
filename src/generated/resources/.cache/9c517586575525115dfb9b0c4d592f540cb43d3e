@@ -1,0 +1,5 @@
+// 1.21.1	2026-01-11T16:22:45.6439549	Tags for minecraft:block mod id aphelion
+058c56a0c17204ed5d9cadaffae84292b4752213 data/c/tags/block/storage_blocks.json
+058c56a0c17204ed5d9cadaffae84292b4752213 data/c/tags/block/storage_blocks/steel.json
+74a1db8ab013dc51b65440e5b6521b340b37af7c data/minecraft/tags/block/mineable/pickaxe.json
+74a1db8ab013dc51b65440e5b6521b340b37af7c data/minecraft/tags/block/needs_stone_tool.json

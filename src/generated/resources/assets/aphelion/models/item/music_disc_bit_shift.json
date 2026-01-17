@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "aphelion:item/music_disc_bit_shift"
+  }
+}

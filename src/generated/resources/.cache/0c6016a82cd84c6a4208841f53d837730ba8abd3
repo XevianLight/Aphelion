@@ -1,0 +1,13 @@
+// 1.21.1	2026-01-11T14:07:35.580656	Tags for minecraft:item mod id aphelion
+3b3972bbbfdb24c10c922069e1dcaf23cfae9edd data/aphelion/tags/item/test_tag.json
+94453f9e7fbd0b799e11da238f186251f628735d data/c/tags/item/ingots.json
+55b41d6583f1d4e00317532bd19b526c17402196 data/c/tags/item/ingots/aluminum.json
+82c7d469a5a8640093243a9249253f19fe28be16 data/c/tags/item/ingots/cobalt.json
+0c262f90e09904bc36bd3a77b55b8db3cf4c0987 data/c/tags/item/ingots/iridium.json
+8a9310ae7b658a4a9c340cabe2f794b0739fd0d9 data/c/tags/item/ingots/neodymium.json
+2d625e70f6f22fabfbebc498f09e8afa2a9cf4b4 data/c/tags/item/ingots/steel.json
+e2f0f9a4e293ca168947bf38128ff39b4e9c6d49 data/c/tags/item/ingots/titanium.json
+79ab8649b888dcd7fb59049571986d0f24bcbf02 data/c/tags/item/ingots/tungsten.json
+9cdf0a234b0f1dfe6179cd8afa6b2c219fa67856 data/c/tags/item/ingots/uranium.json
+058c56a0c17204ed5d9cadaffae84292b4752213 data/c/tags/item/storage_blocks.json
+058c56a0c17204ed5d9cadaffae84292b4752213 data/c/tags/item/storage_blocks/steel.json
