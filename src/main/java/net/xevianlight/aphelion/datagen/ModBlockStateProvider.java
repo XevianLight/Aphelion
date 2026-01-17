@@ -1,0 +1,38 @@
+package net.xevianlight.aphelion.datagen;
+
+import net.minecraft.data.PackOutput;
+import net.minecraft.world.level.block.Block;
+import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
+import net.neoforged.neoforge.client.model.generators.ModelFile;
+import net.neoforged.neoforge.common.data.ExistingFileHelper;
+import net.neoforged.neoforge.registries.DeferredBlock;
+import net.xevianlight.aphelion.Aphelion;
+import net.xevianlight.aphelion.core.init.ModBlocks;
+
+public class ModBlockStateProvider extends BlockStateProvider {
+    public ModBlockStateProvider(PackOutput output, ExistingFileHelper exFileHelper) {
+        super(output, Aphelion.MOD_ID, exFileHelper);
+    }
+
+    @Override
+    protected void registerStatesAndModels() {
+        blockWithItem(ModBlocks.TEST_BLOCK);
+
+        horizontalBlock(ModBlocks.ELECTRIC_ARC_FURNACE.get(), models().orientable("aphelion:electric_arc_furnace",
+                mcLoc("block/blast_furnace_side"),
+                modLoc("block/electric_arc_furnace_front"),
+                mcLoc("block/blast_furnace_top")));
+        blockItem(ModBlocks.ELECTRIC_ARC_FURNACE);
+
+        blockWithItem(ModBlocks.BLOCK_STEEL);
+        blockWithItem(ModBlocks.DIMENSION_CHANGER);
+    }
+
+    private void blockWithItem(DeferredBlock<?> deferredBlock) {
+        simpleBlockWithItem(deferredBlock.get(), cubeAll(deferredBlock.get()));
+    }
+
+    private void blockItem(DeferredBlock<Block> deferredBlock) {
+        simpleBlockItem(deferredBlock.get(), new ModelFile.UncheckedModelFile("aphelion:block/" + deferredBlock.getId().getPath()));
+    }
+}

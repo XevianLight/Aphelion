@@ -1,0 +1,10 @@
+{
+  "bit_shift": {
+    "sounds": [
+      {
+        "name": "aphelion:bit_shift",
+        "stream": true
+      }
+    ]
+  }
+}

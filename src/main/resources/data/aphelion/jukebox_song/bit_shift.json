@@ -1,0 +1,8 @@
+{
+  "comparator_output": 15,
+  "description": {
+    "translate": "item.aphelion.music_disc_bit_shift.desc"
+  },
+  "length_in_seconds": 123.7,
+  "sound_event": "aphelion:bit_shift"
+}

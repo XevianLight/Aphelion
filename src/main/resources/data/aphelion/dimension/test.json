@@ -1,0 +1,11 @@
+{
+  "type": "aphelion:test",
+  "generator": {
+    "type": "minecraft:noise",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "aphelion:test"
+    },
+    "settings": "aphelion:test"
+  }
+}

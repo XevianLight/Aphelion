@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.xevianlight.aphelion.mixins",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+  ],
+  "client": [
+    "common.ClientLevelMixin",
+    "common.DimensionSpecialEffectsMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
