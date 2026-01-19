@@ -15,6 +15,7 @@ import net.xevianlight.aphelion.recipe.ModRecipes;
 import net.xevianlight.aphelion.screen.ElectricArcFurnaceScreen;
 import net.xevianlight.aphelion.screen.ModMenuTypes;
 import net.xevianlight.aphelion.screen.TestBlockScreen;
+import net.xevianlight.aphelion.screen.VacuumArcFurnaceScreen;
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -120,6 +121,7 @@ public class Aphelion {
         public static void registerScreens(RegisterMenuScreensEvent event) {
             event.register(ModMenuTypes.TEST_BLOCK_MENU.get(), TestBlockScreen::new);
             event.register(ModMenuTypes.ELECTRIC_ARC_FURNACE_MENU.get(), ElectricArcFurnaceScreen::new);
+            event.register(ModMenuTypes.VACUUM_ARC_FURNACE_MENU.get(), VacuumArcFurnaceScreen::new);
         }
     }
 }

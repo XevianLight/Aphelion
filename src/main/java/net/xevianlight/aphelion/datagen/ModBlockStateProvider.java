@@ -18,11 +18,12 @@ public class ModBlockStateProvider extends BlockStateProvider {
     protected void registerStatesAndModels() {
         blockWithItem(ModBlocks.TEST_BLOCK);
 
-//        horizontalBlock(ModBlocks.ELECTRIC_ARC_FURNACE.get(), models().orientable("aphelion:electric_arc_furnace",
-//                mcLoc("block/blast_furnace_side"),
-//                modLoc("block/electric_arc_furnace_front"),
-//                mcLoc("block/blast_furnace_top")));
+        horizontalBlock(ModBlocks.ELECTRIC_ARC_FURNACE.get(), models().orientable("aphelion:electric_arc_furnace",
+                mcLoc("block/blast_furnace_side"),
+                modLoc("block/electric_arc_furnace_front"),
+                mcLoc("block/blast_furnace_top")));
         blockItem(ModBlocks.ELECTRIC_ARC_FURNACE);
+        blockItem(ModBlocks.VACUUM_ARC_FURNACE_CONTROLLER);
 
         blockWithItem(ModBlocks.BLOCK_STEEL);
         blockWithItem(ModBlocks.DIMENSION_CHANGER);

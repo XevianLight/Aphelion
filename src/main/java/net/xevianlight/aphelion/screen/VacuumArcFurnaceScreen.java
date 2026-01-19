@@ -14,16 +14,16 @@ import net.xevianlight.aphelion.util.MouseUtil;
 
 import java.util.Optional;
 
-public class ElectricArcFurnaceScreen extends AbstractContainerScreen<ElectricArcFurnaceMenu> {
+public class VacuumArcFurnaceScreen extends AbstractContainerScreen<VacuumArcFurnaceMenu> {
 
     private static final ResourceLocation GUI_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(Aphelion.MOD_ID, "textures/gui/electric_arc_furnace/gui.png");
+            ResourceLocation.fromNamespaceAndPath(Aphelion.MOD_ID, "textures/gui/vacuum_arc_furnace/gui.png");
     private static final ResourceLocation ARROW_TEXTURE =
             ResourceLocation.fromNamespaceAndPath(Aphelion.MOD_ID,"textures/gui/base/arrow_progress.png");
 
     private EnergyDisplayTooltipArea energyInfoArea;
 
-    public ElectricArcFurnaceScreen(ElectricArcFurnaceMenu menu, Inventory playerInventory, Component title) {
+    public VacuumArcFurnaceScreen(VacuumArcFurnaceMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
     }
 

@@ -14,4 +14,5 @@ public class ModBlocks {
     public static final  DeferredBlock<Block> DIMENSION_CHANGER = BLOCKS.register("dimension_changer", () -> new DimensionChangerBlock(DimensionChangerBlock.getProperties()));
     public static final  DeferredBlock<Block> ELECTRIC_ARC_FURNACE = BLOCKS.register("electric_arc_furnace", () -> new ElectricArcFurnace(ElectricArcFurnace.getProperties()));
     public static final  DeferredBlock<Block> ARC_FURNACE_CASING_BLOCK = BLOCKS.register("arc_furnace_casing", () -> new ArcFurnaceCasingBlock(ArcFurnaceCasingBlock.getProperties()));
+    public static final  DeferredBlock<Block> VACUUM_ARC_FURNACE_CONTROLLER = BLOCKS.register("vacuum_arc_furnace_controller", () -> new VacuumArcFurnaceController(VacuumArcFurnaceController.getProperties()));
 }

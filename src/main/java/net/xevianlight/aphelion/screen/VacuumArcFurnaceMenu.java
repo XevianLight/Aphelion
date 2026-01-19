@@ -11,34 +11,36 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.items.SlotItemHandler;
+import net.xevianlight.aphelion.block.custom.VacuumArcFurnaceController;
 import net.xevianlight.aphelion.block.entity.custom.ElectricArcFurnaceEntity;
+import net.xevianlight.aphelion.block.entity.custom.VacuumArcFurnaceControllerEntity;
 import net.xevianlight.aphelion.util.EnergyItemSlot;
 import net.xevianlight.aphelion.util.ExtractOnlySlot;
 import org.jetbrains.annotations.NotNull;
 
-public class ElectricArcFurnaceMenu extends AbstractContainerMenu {
+public class VacuumArcFurnaceMenu extends AbstractContainerMenu {
 
-    public final ElectricArcFurnaceEntity blockEntity;
+    public final VacuumArcFurnaceControllerEntity blockEntity;
     private final Level level;
     private final ContainerData data;
 
-    public ElectricArcFurnaceMenu(int i, Inventory inventory, FriendlyByteBuf extraData) {
+    public VacuumArcFurnaceMenu(int i, Inventory inventory, FriendlyByteBuf extraData) {
         this(i, inventory, inventory.player.level().getBlockEntity(extraData.readBlockPos()), new SimpleContainerData(4));
     }
 
-    public ElectricArcFurnaceMenu(int i, Inventory inventory, BlockEntity blockEntity, ContainerData data) {
-        super(ModMenuTypes.ELECTRIC_ARC_FURNACE_MENU.get(), i);
-        this.blockEntity = ((ElectricArcFurnaceEntity) blockEntity);
+    public VacuumArcFurnaceMenu(int i, Inventory inventory, BlockEntity blockEntity, ContainerData data) {
+        super(ModMenuTypes.VACUUM_ARC_FURNACE_MENU.get(), i);
+        this.blockEntity = ((VacuumArcFurnaceControllerEntity) blockEntity);
         this.level = inventory.player.level();
         this.data = data;
 
         addPlayerInventory(inventory);
         addPlayerHotbar(inventory);
 
-        this.addSlot(new EnergyItemSlot(this.blockEntity.inventory, ElectricArcFurnaceEntity.ENERGY_SLOT, 8, 54));
-        this.addSlot(new SlotItemHandler(this.blockEntity.inventory, ElectricArcFurnaceEntity.INPUT_SLOT, 63, 35));
-        this.addSlot(new SlotItemHandler(this.blockEntity.inventory, ElectricArcFurnaceEntity.SECONDARY_INPUT_SLOT, 40, 35));
-        this.addSlot(new ExtractOnlySlot(this.blockEntity.inventory, ElectricArcFurnaceEntity.OUTPUT_SLOT, 125, 35));
+        this.addSlot(new EnergyItemSlot(this.blockEntity.inventory, VacuumArcFurnaceControllerEntity.ENERGY_SLOT, 8, 54));
+        this.addSlot(new SlotItemHandler(this.blockEntity.inventory, VacuumArcFurnaceControllerEntity.INPUT_SLOT, 63, 35));
+        this.addSlot(new SlotItemHandler(this.blockEntity.inventory, VacuumArcFurnaceControllerEntity.SECONDARY_INPUT_SLOT, 40, 35));
+        this.addSlot(new ExtractOnlySlot(this.blockEntity.inventory, VacuumArcFurnaceControllerEntity.OUTPUT_SLOT, 125, 35));
 
         addDataSlots(data);
     }

@@ -11,6 +11,7 @@ import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.xevianlight.aphelion.Aphelion;
 import net.xevianlight.aphelion.block.entity.custom.ElectricArcFurnaceEntity;
 import net.xevianlight.aphelion.block.entity.custom.TestBlockEntity;
+import net.xevianlight.aphelion.block.entity.custom.VacuumArcFurnaceControllerEntity;
 import net.xevianlight.aphelion.core.init.ModBlockEntities;
 import net.xevianlight.aphelion.network.ServerPayloadHandler;
 import net.xevianlight.aphelion.network.packet.PartitionData;
@@ -22,6 +23,8 @@ public class ModBusEvents {
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.TEST_BLOCK_ENTITY.get(), TestBlockEntity::getItemHandler);
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.ELECTRIC_ARC_FURNACE_ENTITY.get(), ElectricArcFurnaceEntity::getItemHandler);
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntities.ELECTRIC_ARC_FURNACE_ENTITY.get(), ElectricArcFurnaceEntity::getEnergyStorage);
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.VACUUM_ARC_FURNACE_ENTITY.get(), VacuumArcFurnaceControllerEntity::getItemHandler);
+        event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntities.VACUUM_ARC_FURNACE_ENTITY.get(), VacuumArcFurnaceControllerEntity::getEnergyStorage);
     }
 
     @SubscribeEvent

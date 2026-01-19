@@ -33,4 +33,5 @@ public static final DeferredItem<Item> MUSIC_DISC_BIT_SHIFT = ITEMS.register("mu
     public static final DeferredItem<BlockItem> ELECTRIC_ARC_FURNACE = ITEMS.register("electric_arc_furnace", () -> new BlockItem(ModBlocks.ELECTRIC_ARC_FURNACE.get(), ElectricArcFurnace.getItemProperties()));
     public static final DeferredItem<BlockItem> BLOCK_STEEL = ITEMS.register("block_steel", () -> new BlockItem(ModBlocks.BLOCK_STEEL.get(), BlockSteel.getItemProperties()));
     public static final DeferredItem<BlockItem> ARC_FURNACE_CASING_BLOCK = ITEMS.register("arc_furnace_casing", () -> new BlockItem(ModBlocks.ARC_FURNACE_CASING_BLOCK.get(), ArcFurnaceCasingBlock.getItemProperties()));
+    public static final DeferredItem<BlockItem> VACUUM_ARC_FURNACE_CONTROLLER = ITEMS.register("vacuum_arc_furnace_controller", () -> new BlockItem(ModBlocks.VACUUM_ARC_FURNACE_CONTROLLER.get(), VacuumArcFurnaceController.getItemProperties()));
 }

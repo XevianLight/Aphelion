@@ -16,8 +16,12 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.*;
+import net.minecraft.world.item.crafting.BlastingRecipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.Capabilities;
@@ -31,15 +35,17 @@ import net.xevianlight.aphelion.core.init.ModBlocks;
 import net.xevianlight.aphelion.recipe.ElectricArcFurnaceRecipe;
 import net.xevianlight.aphelion.recipe.ElectricArcFurnaceRecipeInput;
 import net.xevianlight.aphelion.recipe.ModRecipes;
+import net.xevianlight.aphelion.screen.VacuumArcFurnaceMenu;
 import net.xevianlight.aphelion.screen.ElectricArcFurnaceMenu;
 import net.xevianlight.aphelion.util.AphelionBlockStateProperties;
+import net.xevianlight.aphelion.util.IMultiblockController;
 import net.xevianlight.aphelion.util.MultiblockHelper;
 import net.xevianlight.aphelion.util.SidedSlotHandler;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Optional;
 
-public class ElectricArcFurnaceEntity extends BlockEntity implements MenuProvider {
+public class VacuumArcFurnaceControllerEntity extends BlockEntity implements MenuProvider, IMultiblockController {
 
     private final int SIZE = 4;
     private int ENERGY_CAPACITY = 64000;
@@ -55,14 +61,14 @@ public class ElectricArcFurnaceEntity extends BlockEntity implements MenuProvide
     public static final int OUTPUT_SLOT = 2;
     public static final int ENERGY_SLOT = 3;
 
-    public ElectricArcFurnaceEntity(BlockPos pos, BlockState blockState) {
-        super(ModBlockEntities.ELECTRIC_ARC_FURNACE_ENTITY.get(), pos, blockState);
+    public VacuumArcFurnaceControllerEntity(BlockPos pos, BlockState blockState) {
+        super(ModBlockEntities.VACUUM_ARC_FURNACE_ENTITY.get(), pos, blockState);
         this.data = new ContainerData() {
             @Override
             public int get(int index) {
                 return switch (index) {
-                    case 0 -> ElectricArcFurnaceEntity.this.progress;
-                    case 1 -> ElectricArcFurnaceEntity.this.maxProgress;
+                    case 0 -> VacuumArcFurnaceControllerEntity.this.progress;
+                    case 1 -> VacuumArcFurnaceControllerEntity.this.maxProgress;
                     default -> 0;
                 };
             }
@@ -70,8 +76,8 @@ public class ElectricArcFurnaceEntity extends BlockEntity implements MenuProvide
             @Override
             public void set(int index, int pValue) {
                 switch (index) {
-                    case 0: ElectricArcFurnaceEntity.this.progress = pValue;
-                    case 1: ElectricArcFurnaceEntity.this.maxProgress = pValue;
+                    case 0: VacuumArcFurnaceControllerEntity.this.progress = pValue;
+                    case 1: VacuumArcFurnaceControllerEntity.this.maxProgress = pValue;
                 }
             }
 
@@ -317,11 +323,15 @@ public class ElectricArcFurnaceEntity extends BlockEntity implements MenuProvide
     private final IItemHandler jadeHandler = new SidedSlotHandler(inventory, new int[]{0}, false, false);
 
     public IItemHandler getItemHandler(Direction direction) {
-        return fullHandler;
+        if (direction != null)
+            return isFormed() ? fullHandler : null;
+        return isFormed() ? fullHandler : emptyJeiHandler;
     }
 
     public IEnergyStorage getEnergyStorage(@Nullable Direction direction) {
-        return ENERGY_STORAGE;
+        if (direction == null)
+            return isFormed() ? ENERGY_STORAGE : NULL_ENERGY_STORAGE;
+        return isFormed() ? ENERGY_STORAGE : null;
     }
 
     public IEnergyStorage getTrueEnergyStorage(@Nullable Direction direction) {
@@ -379,7 +389,9 @@ public class ElectricArcFurnaceEntity extends BlockEntity implements MenuProvide
 
     @Override
     public @Nullable AbstractContainerMenu createMenu(int i, Inventory inventory, Player player) {
-            return new ElectricArcFurnaceMenu(i, inventory, this, this.data);
+        if (isFormed())
+            return new VacuumArcFurnaceMenu(i, inventory, this, this.data);
+        return new ElectricArcFurnaceMenu(i, inventory, this, this.data);
     }
 
     @Nullable
@@ -405,7 +417,91 @@ public class ElectricArcFurnaceEntity extends BlockEntity implements MenuProvide
     }
 
     public static final MultiblockHelper.ShapePart[] SHAPE = new MultiblockHelper.ShapePart[] {
-        new MultiblockHelper.ShapePart(new BlockPos(3,0,3), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
+
+            //Layer -1
+        new MultiblockHelper.ShapePart(new BlockPos(1,-1,0), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
+        new MultiblockHelper.ShapePart(new BlockPos(1,-1,1), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
+        new MultiblockHelper.ShapePart(new BlockPos(1,-1,2), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
+        new MultiblockHelper.ShapePart(new BlockPos(-1,-1,0), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
+        new MultiblockHelper.ShapePart(new BlockPos(-1,-1,1), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
+        new MultiblockHelper.ShapePart(new BlockPos(-1,-1,2), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
+        new MultiblockHelper.ShapePart(new BlockPos(0,-1,0), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
+        new MultiblockHelper.ShapePart(new BlockPos(0,-1,1), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
+        new MultiblockHelper.ShapePart(new BlockPos(0,-1,2), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
+
+            //Layer 0
+        new MultiblockHelper.ShapePart(new BlockPos(1,0,0), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
+        new MultiblockHelper.ShapePart(new BlockPos(1,0,1), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
+        new MultiblockHelper.ShapePart(new BlockPos(1,0,2), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
+        new MultiblockHelper.ShapePart(new BlockPos(-1,0,0), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
+        new MultiblockHelper.ShapePart(new BlockPos(-1,0,1), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
+        new MultiblockHelper.ShapePart(new BlockPos(-1,0,2), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
+        new MultiblockHelper.ShapePart(new BlockPos(0,0,2), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
+        new MultiblockHelper.ShapePart(new BlockPos(0,0,1), s -> s.is(Blocks.AIR)),
+
+            //Layer 1
+
+        new MultiblockHelper.ShapePart(new BlockPos(1,1,0), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
+        new MultiblockHelper.ShapePart(new BlockPos(1,1,1), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
+        new MultiblockHelper.ShapePart(new BlockPos(1,1,2), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
+        new MultiblockHelper.ShapePart(new BlockPos(-1,1,0), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
+        new MultiblockHelper.ShapePart(new BlockPos(-1,1,1), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
+        new MultiblockHelper.ShapePart(new BlockPos(-1,1,2), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
+        new MultiblockHelper.ShapePart(new BlockPos(0,1,0), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
+        new MultiblockHelper.ShapePart(new BlockPos(0,1,1), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
+        new MultiblockHelper.ShapePart(new BlockPos(0,1,2), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
 //        new MultiblockHelper.ShapePart(new BlockPos(-1,0,0), s -> s.is(Blocks.AMETHYST_BLOCK))
     };
+
+
+
+
+    /// MULTIBLOCK
+    /// LOGIC
+    /// BELOW
+
+
+//    record ShapePart (BlockPos offset, Predicate<BlockState> rule) {}
+
+    private boolean formed = false; // cached runtime state
+
+    // Assumes the default state is NORTH.
+
+    // (Left -Right, Up -Down, Back -Front)
+
+
+//    private static final BlockPos[] SHAPE = new BlockPos[] {
+//            new BlockPos(1, 0, 0),
+//            new BlockPos(0, 0, 1),
+//            new BlockPos(1, 0, 1),
+//
+//            new BlockPos(0, 1, 0),
+//            new BlockPos(1, 1, 0),
+//            new BlockPos(0, 1, 1),
+//            new BlockPos(1, 1, 1),
+//    };
+
+
+
+    public boolean isFormed() {
+        return getBlockState().hasProperty(AphelionBlockStateProperties.FORMED)
+                && getBlockState().getValue(AphelionBlockStateProperties.FORMED);
+    }
+
+    @Override
+    public void setFormed(boolean formed) {
+        this.formed = formed;
+        invalidateCapabilities();
+        if (!formed) {
+            drops();
+        }
+    }
+
+    private void setFormedState(boolean value) {
+        BlockState state = getBlockState();
+        if (state.hasProperty(ElectricArcFurnace.FORMED) && state.getValue(ElectricArcFurnace.FORMED) != value) {
+            level.setBlock(worldPosition, state.setValue(ElectricArcFurnace.FORMED, value), 3);
+        }
+    }
+
 }

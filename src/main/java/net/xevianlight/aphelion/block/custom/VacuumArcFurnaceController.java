@@ -25,7 +25,7 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.neoforged.neoforge.items.ItemStackHandler;
-import net.xevianlight.aphelion.block.entity.custom.ElectricArcFurnaceEntity;
+import net.xevianlight.aphelion.block.entity.custom.VacuumArcFurnaceControllerEntity;
 import net.xevianlight.aphelion.core.init.ModBlockEntities;
 import net.xevianlight.aphelion.util.AphelionBlockStateProperties;
 import net.xevianlight.aphelion.util.MultiblockHelper;
@@ -34,19 +34,19 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ElectricArcFurnace extends BaseEntityBlock {
+public class VacuumArcFurnaceController extends BaseEntityBlock {
 
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty LIT = BlockStateProperties.LIT;
     public static final BooleanProperty FORMED = AphelionBlockStateProperties.FORMED;
 
-    public ElectricArcFurnace(Properties properties) {
+    public VacuumArcFurnaceController(Properties properties) {
         super(properties);
         this.registerDefaultState(this.getStateDefinition().any()
                 .setValue(FORMED, false));
     }
 
-    public static final MapCodec<ElectricArcFurnace> CODEC = simpleCodec(ElectricArcFurnace::new);
+    public static final MapCodec<VacuumArcFurnaceController> CODEC = simpleCodec(VacuumArcFurnaceController::new);
 
     private final int INPUT_SLOT = 0;
     private final int SECONDARY_INPUT_SLOT = 1;
@@ -74,8 +74,9 @@ public class ElectricArcFurnace extends BaseEntityBlock {
     @Override
     public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult result) {
 
-        if (!level.isClientSide && player instanceof ServerPlayer serverPlayer && level.getBlockEntity(pos) instanceof ElectricArcFurnaceEntity electricArcFurnaceEntity) {
-                serverPlayer.openMenu(new SimpleMenuProvider(electricArcFurnaceEntity, Component.literal("Electric Arc Furnace")), pos);
+        if (!level.isClientSide && player instanceof ServerPlayer serverPlayer && level.getBlockEntity(pos) instanceof VacuumArcFurnaceControllerEntity vacuumArcFurnaceEntity) {
+            if (vacuumArcFurnaceEntity.isFormed())
+                serverPlayer.openMenu(new SimpleMenuProvider(vacuumArcFurnaceEntity, Component.literal("Vacuum Arc Furnace")), pos);
         }
         return InteractionResult.sidedSuccess(level.isClientSide);
     }
@@ -84,7 +85,7 @@ public class ElectricArcFurnace extends BaseEntityBlock {
 
     @Override
     public @Nullable BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
-        return new ElectricArcFurnaceEntity(blockPos, blockState);
+        return new VacuumArcFurnaceControllerEntity(blockPos, blockState);
     }
 
     @Override
@@ -96,9 +97,9 @@ public class ElectricArcFurnace extends BaseEntityBlock {
     protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
         if (!level.isClientSide && state.getBlock() != newState.getBlock()) {
             BlockEntity blockEntity= level.getBlockEntity(pos);
-            if (blockEntity instanceof ElectricArcFurnaceEntity electricArcFurnaceEntity) {
-//                if(state.getValue(FORMED)) MultiblockHelper.unformForRemoval(level, state, pos, ElectricArcFurnaceEntity.SHAPE, AphelionBlockStateProperties.FORMED);
-                electricArcFurnaceEntity.drops();
+            if (blockEntity instanceof VacuumArcFurnaceControllerEntity vacuumArcFurnaceEntity) {
+                if(state.getValue(FORMED)) MultiblockHelper.unformForRemoval(level, state, pos, vacuumArcFurnaceEntity.SHAPE, AphelionBlockStateProperties.FORMED);
+                vacuumArcFurnaceEntity.drops();
             }
         }
         super.onRemove(state, level, pos, newState, movedByPiston);
@@ -109,9 +110,9 @@ public class ElectricArcFurnace extends BaseEntityBlock {
         super.onPlace(state, level, pos, oldState, movedByPiston);
         if (!level.isClientSide() && oldState.getBlock() != state.getBlock()) {
             BlockEntity blockEntity= level.getBlockEntity(pos);
-//            if (blockEntity instanceof ElectricArcFurnaceEntity electricArcFurnaceEntity) {
-//                MultiblockHelper.tryForm(level, state, pos, ElectricArcFurnaceEntity.SHAPE, AphelionBlockStateProperties.FORMED);
-//            }
+            if (blockEntity instanceof VacuumArcFurnaceControllerEntity vacuumArcFurnaceEntity) {
+                MultiblockHelper.tryForm(level, state, pos, vacuumArcFurnaceEntity.SHAPE, AphelionBlockStateProperties.FORMED);
+            }
         }
     }
 
@@ -153,13 +154,13 @@ public class ElectricArcFurnace extends BaseEntityBlock {
     @Override
     protected int getAnalogOutputSignal(BlockState blockState, Level level, BlockPos pos) {
         List<Integer> slots = new ArrayList<>();
-        slots.add(ElectricArcFurnaceEntity.INPUT_SLOT);
-        slots.add(ElectricArcFurnaceEntity.SECONDARY_INPUT_SLOT);
-        slots.add(ElectricArcFurnaceEntity.OUTPUT_SLOT);
-        ElectricArcFurnaceEntity electricArcFurnaceEntity = ((ElectricArcFurnaceEntity) level.getBlockEntity(pos));
+        slots.add(VacuumArcFurnaceControllerEntity.INPUT_SLOT);
+        slots.add(VacuumArcFurnaceControllerEntity.SECONDARY_INPUT_SLOT);
+        slots.add(VacuumArcFurnaceControllerEntity.OUTPUT_SLOT);
+        VacuumArcFurnaceControllerEntity vacuumArcFurnaceEntity = ((VacuumArcFurnaceControllerEntity) level.getBlockEntity(pos));
 
-        if (electricArcFurnaceEntity != null)
-            return getRedstoneSignalFromItemHandler(electricArcFurnaceEntity.inventory, slots);
+        if (vacuumArcFurnaceEntity != null)
+            return getRedstoneSignalFromItemHandler(vacuumArcFurnaceEntity.inventory, slots);
 
         return 0;
     }
@@ -169,7 +170,7 @@ public class ElectricArcFurnace extends BaseEntityBlock {
         if (level.isClientSide) {
             return null;
         }
-        return createTickerHelper(blockEntityType, ModBlockEntities.ELECTRIC_ARC_FURNACE_ENTITY.get(), (level1, blockPos, blockState, electricArcFurnaceEntity) -> electricArcFurnaceEntity.tick(level1, blockPos, blockState));
+        return createTickerHelper(blockEntityType, ModBlockEntities.VACUUM_ARC_FURNACE_ENTITY.get(), (level1, blockPos, blockState, vacuumArcFurnaceEntity) -> vacuumArcFurnaceEntity.tick(level1, blockPos, blockState));
 
     }
 

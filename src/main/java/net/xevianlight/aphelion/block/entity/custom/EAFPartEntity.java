@@ -7,9 +7,10 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.xevianlight.aphelion.core.init.ModBlockEntities;
+import net.xevianlight.aphelion.util.IMultiblockPart;
 import org.jetbrains.annotations.Nullable;
 
-public class EAFPartEntity extends BlockEntity {
+public class EAFPartEntity extends BlockEntity implements IMultiblockPart {
     @Nullable private BlockPos controllerPos;
 
     public EAFPartEntity(BlockPos pos, BlockState blockState) {
