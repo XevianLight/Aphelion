@@ -3,11 +3,14 @@ package net.xevianlight.aphelion.util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.xevianlight.aphelion.Aphelion;
+import net.xevianlight.aphelion.core.init.ModBlocks;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -43,18 +46,29 @@ public class MultiblockHelper {
         };
     }
 
-    private static boolean structureMatches(Level level, BlockState state, BlockPos pos, ShapePart[] shape) {
+    private static BlockState effectiveState(Level level, BlockPos pos) {
+        BlockState state = level.getBlockState(pos);
+
+        if (state.is(ModBlocks.VAF_MULTIBLOCK_DUMMY_BLOCK.get())) {
+            BlockEntity be = level.getBlockEntity(pos);
+            if (be instanceof IMultiblockPart part) {
+                BlockState mimic = part.getMimicing();
+                if (mimic != null) return mimic;
+            }
+        }
+        return state;
+    }
+
+    private static boolean structureMatches(Level level, BlockState controllerState, BlockPos controllerPos, ShapePart[] shape) {
         if (level == null || level.isClientSide) return false;
 
-        Direction facing = state.getValue(BlockStateProperties.HORIZONTAL_FACING);
+        Direction facing = controllerState.getValue(BlockStateProperties.HORIZONTAL_FACING);
 
         for (ShapePart part : shape) {
-            BlockPos testPos = pos.offset(rotateY(part.offset(), facing));
-            BlockState check = level.getBlockState(testPos);
+            BlockPos testPos = controllerPos.offset(rotateY(part.offset(), facing));
+            BlockState check = effectiveState(level, testPos);
 
-            if (!part.rule().test(check)) {
-                return false;
-            }
+            if (!part.rule().test(check)) return false;
         }
         return true;
     }
@@ -70,14 +84,13 @@ public class MultiblockHelper {
         boolean valid = structureMatches(level, state, pos, shape);
 
         if (valid && !controller.isFormed()) {
-            controller.setFormed(true);
             linkParts(level, state, pos, shape, formedProp);
-            if (state.hasProperty(AphelionBlockStateProperties.FORMED) && !state.getValue(AphelionBlockStateProperties.FORMED)) {
-                level.setBlock(pos, state.setValue(AphelionBlockStateProperties.FORMED, true), 3);
-            }
+            controller.setFormed(true);
+            setControllerFormedProp(level, pos, true, formedProp);
         } else if (!valid && controller.isFormed()) {
             unform(level, state, pos, shape, formedProp);
         }
+
     }
 
     public static void unform(Level level, BlockState state, BlockPos pos, ShapePart[] shape, @Nullable BooleanProperty formedProp) {
@@ -87,11 +100,9 @@ public class MultiblockHelper {
         if (!(be instanceof IMultiblockController controller)) return;
 
         controller.setFormed(false);
-        if (state.hasProperty(AphelionBlockStateProperties.FORMED) && state.getValue(AphelionBlockStateProperties.FORMED)) {
-            level.setBlock(pos, state.setValue(AphelionBlockStateProperties.FORMED, false), 3);
-        }
+        setControllerFormedProp(level, pos, false, formedProp);
 
-        unlinkParts(level, state, pos, shape, formedProp);
+        unlinkParts(level, level.getBlockState(pos), pos, shape, formedProp);
 
     }
 
@@ -106,58 +117,64 @@ public class MultiblockHelper {
 
     }
 
-    private static void unlinkParts(Level level, BlockState state, BlockPos pos, ShapePart[] shape, @Nullable BooleanProperty formedProp) {
+    private static void unlinkParts(Level level, BlockState controllerState, BlockPos controllerPos, ShapePart[] shape, @Nullable BooleanProperty formedProp) {
         if (level == null || level.isClientSide) return;
 
-        Direction facing = state.getValue(BlockStateProperties.HORIZONTAL_FACING);
+        Direction facing = controllerState.getValue(BlockStateProperties.HORIZONTAL_FACING);
 
         for (ShapePart part : shape) {
-            BlockPos partPos = pos.offset(rotateY(part.offset(), facing));
-            BlockState st = level.getBlockState(partPos);
-
-            if (formedProp != null && st.hasProperty(formedProp) && st.getValue(formedProp)) {
-                level.setBlock(partPos, st.setValue(formedProp, false), 3);
-            }
+            BlockPos partPos = controllerPos.offset(rotateY(part.offset(), facing));
 
             BlockEntity be = level.getBlockEntity(partPos);
-            if (be instanceof IMultiblockPart mbPart) {
-                if (pos.equals(mbPart.getControllerPos())) {
-                    mbPart.setControllerPos(null);
-                    be.setChanged();
-                }
+            if (!(be instanceof IMultiblockPart dummy)) {
+                // Don't return — just skip this position
+                continue;
             }
-        }
 
+            // Only undo if this dummy belongs to this controller
+            if (!controllerPos.equals(dummy.getControllerPos())) continue;
+
+            BlockState restore = dummy.getMimicing();
+            if (restore == null) restore = Blocks.AIR.defaultBlockState();
+
+            // Restore the original block
+            level.setBlock(partPos, restore, Block.UPDATE_ALL);
+
+            // Clear ownership (not strictly necessary since BE is being removed by setBlock)
+            dummy.setControllerPos(null);
+            be.setChanged();
+        }
     }
 
-    private static void linkParts(Level level, BlockState state, BlockPos pos, ShapePart[] shape, @Nullable BooleanProperty formedProp) {
+    private static void linkParts(Level level, BlockState controllerState, BlockPos controllerPos, ShapePart[] shape, @Nullable BooleanProperty formedProp) {
         if (level == null || level.isClientSide) return;
 
-        Direction facing = state.getValue(BlockStateProperties.HORIZONTAL_FACING);
+        Direction facing = controllerState.getValue(BlockStateProperties.HORIZONTAL_FACING);
 
         for (ShapePart part : shape) {
-            BlockPos partPos = pos.offset(rotateY(part.offset(), facing));
-            BlockState st = level.getBlockState(partPos);
+            BlockPos partPos = controllerPos.offset(rotateY(part.offset(), facing));
 
-            Aphelion.LOGGER.debug("[Multiblock] partPos={} block={} hasFormed={} formedVal={}",
-                    partPos,
-                    st.getBlock(),
-                    (formedProp != null && st.hasProperty(formedProp)),
-                    (formedProp != null && st.hasProperty(formedProp)) ? st.getValue(formedProp) : "n/a"
-            );
+            // 1) Capture the original state BEFORE replacing
+            BlockState original = level.getBlockState(partPos);
 
-            if (formedProp != null && st.hasProperty(formedProp) && !st.getValue(formedProp)) {
-                level.setBlock(partPos, st.setValue(formedProp, true), 3);
-                st = level.getBlockState(partPos);
-            }
+            // Optional: don't replace the controller itself
+            if (partPos.equals(controllerPos)) continue;
 
+            // 2) Replace with dummy block unconditionally
+            level.setBlock(partPos, ModBlocks.VAF_MULTIBLOCK_DUMMY_BLOCK.get().defaultBlockState(), Block.UPDATE_ALL);
+
+            // 3) Now fetch the dummy BE (might be null in edge cases)
             BlockEntity be = level.getBlockEntity(partPos);
-            if (be instanceof IMultiblockPart mbPart) {
-                if (!pos.equals(mbPart.getControllerPos())) {
-                    mbPart.setControllerPos(pos);
-                    be.setChanged();
-                }
+            if (!(be instanceof IMultiblockPart dummy)) {
+                // If this happens, your dummy block probably isn't creating its BE
+                Aphelion.LOGGER.warn("[Multiblock] Dummy BE missing at {}", partPos);
+                continue;
             }
+
+            // 4) Set ownership + mimic state
+            dummy.setControllerPos(controllerPos);
+            dummy.setMimicing(original);
+            be.setChanged();
         }
     }
 
@@ -167,26 +184,48 @@ public class MultiblockHelper {
             BlockPos controllerPos,
             ShapePart[] shape
     ) {
+        if (level == null || level.isClientSide) return false;
+
         Direction facing = controllerState.getValue(BlockStateProperties.HORIZONTAL_FACING);
 
         for (ShapePart part : shape) {
             BlockPos rotated = rotateY(part.offset(), facing);
             BlockPos worldPos = controllerPos.offset(rotated);
+            BlockState check = effectiveState(level, worldPos);
 
             BlockState found = level.getBlockState(worldPos);
 
-            if (!part.rule().test(found)) {
+            if (!part.rule().test(check)) {
                 Aphelion.LOGGER.debug("[Multiblock] FAIL at offset=" + part.offset()
                         + " facing=" + facing
                         + " rotated=" + rotated
                         + " worldPos=" + worldPos
-                        + " found=" + found.getBlock());
+                        + " found=" + check.getBlock());
                 return false;
             }
         }
 
         Aphelion.LOGGER.debug("[Multiblock] OK facing={} controllerPos={}", controllerState.getValue(BlockStateProperties.HORIZONTAL_FACING), controllerPos);
         return true;
+    }
+
+    private static void setControllerFormedProp(Level level, BlockPos pos, boolean formed, @Nullable BooleanProperty formedProp) {
+        if (formedProp == null) return;
+
+        BlockState cur = level.getBlockState(pos);
+        if (!cur.hasProperty(formedProp)) { return; }
+        if (cur.getValue(formedProp) == formed) { return; }
+
+        BlockState before = level.getBlockState(pos);
+        level.setBlock(pos, cur.setValue(formedProp, formed), Block.UPDATE_ALL);
+        level.sendBlockUpdated(pos, before, level.getBlockState(pos), 3);
+
+        BlockEntity be = level.getBlockEntity(pos);
+        if (be instanceof IMultiblockController controller) {
+            controller.setFormed(formed);
+            be.setChanged();
+        }
+
     }
 
 }

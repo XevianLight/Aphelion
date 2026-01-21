@@ -6,6 +6,7 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
+import net.xevianlight.aphelion.block.dummy.renderer.MultiblockDummyRenderer;
 import net.xevianlight.aphelion.client.AphelionConfig;
 import net.xevianlight.aphelion.core.init.*;
 import net.xevianlight.aphelion.fluid.BaseFluidType;
@@ -114,7 +115,7 @@ public class Aphelion {
 
         @SubscribeEvent
         public static void registerBER(EntityRenderersEvent.RegisterRenderers event) {
-
+            event.registerBlockEntityRenderer(ModBlockEntities.VAF_MULTIBLOCK_DUMMY_ENTITY.get(), MultiblockDummyRenderer::new);
         }
 
         @SubscribeEvent

@@ -25,9 +25,11 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.neoforged.neoforge.items.ItemStackHandler;
+import net.xevianlight.aphelion.block.entity.custom.ElectricArcFurnaceEntity;
 import net.xevianlight.aphelion.block.entity.custom.VacuumArcFurnaceControllerEntity;
 import net.xevianlight.aphelion.core.init.ModBlockEntities;
 import net.xevianlight.aphelion.util.AphelionBlockStateProperties;
+import net.xevianlight.aphelion.util.IMultiblockController;
 import net.xevianlight.aphelion.util.MultiblockHelper;
 import org.jetbrains.annotations.Nullable;
 
@@ -43,6 +45,8 @@ public class VacuumArcFurnaceController extends BaseEntityBlock {
     public VacuumArcFurnaceController(Properties properties) {
         super(properties);
         this.registerDefaultState(this.getStateDefinition().any()
+                .setValue(FACING, Direction.NORTH)
+                .setValue(LIT, false)
                 .setValue(FORMED, false));
     }
 
@@ -61,7 +65,7 @@ public class VacuumArcFurnaceController extends BaseEntityBlock {
     public static Properties getProperties() {
         return Properties
                 .of()
-                .sound(SoundType.METAL)
+                .sound(SoundType.NETHERITE_BLOCK)
                 .destroyTime(2f)
                 .explosionResistance(10f)
                 .requiresCorrectToolForDrops();
@@ -73,7 +77,6 @@ public class VacuumArcFurnaceController extends BaseEntityBlock {
 
     @Override
     public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult result) {
-
         if (!level.isClientSide && player instanceof ServerPlayer serverPlayer && level.getBlockEntity(pos) instanceof VacuumArcFurnaceControllerEntity vacuumArcFurnaceEntity) {
             if (vacuumArcFurnaceEntity.isFormed())
                 serverPlayer.openMenu(new SimpleMenuProvider(vacuumArcFurnaceEntity, Component.literal("Vacuum Arc Furnace")), pos);
@@ -110,8 +113,8 @@ public class VacuumArcFurnaceController extends BaseEntityBlock {
         super.onPlace(state, level, pos, oldState, movedByPiston);
         if (!level.isClientSide() && oldState.getBlock() != state.getBlock()) {
             BlockEntity blockEntity= level.getBlockEntity(pos);
-            if (blockEntity instanceof VacuumArcFurnaceControllerEntity vacuumArcFurnaceEntity) {
-                MultiblockHelper.tryForm(level, state, pos, vacuumArcFurnaceEntity.SHAPE, AphelionBlockStateProperties.FORMED);
+            if (blockEntity instanceof IMultiblockController mbController) {
+                mbController.markDirty();
             }
         }
     }

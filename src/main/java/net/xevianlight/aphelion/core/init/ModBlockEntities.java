@@ -4,6 +4,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.xevianlight.aphelion.Aphelion;
+import net.xevianlight.aphelion.block.dummy.entity.VAFMultiblockDummyBlockEntity;
 import net.xevianlight.aphelion.block.entity.custom.*;
 
 import java.util.function.Supplier;
@@ -34,5 +35,10 @@ public class ModBlockEntities {
     public static final Supplier<BlockEntityType<VacuumArcFurnaceControllerEntity>> VACUUM_ARC_FURNACE_ENTITY =
             BLOCK_ENTITIES.register("vacuum_arc_furnace_controller_entity", () -> BlockEntityType.Builder.of(
                     VacuumArcFurnaceControllerEntity::new, ModBlocks.VACUUM_ARC_FURNACE_CONTROLLER.get()).build(null)
+            );
+
+    public static final Supplier<BlockEntityType<VAFMultiblockDummyBlockEntity>> VAF_MULTIBLOCK_DUMMY_ENTITY =
+            BLOCK_ENTITIES.register("vaf_multiblock_dummy_entity", () -> BlockEntityType.Builder.of(
+                    VAFMultiblockDummyBlockEntity::new, ModBlocks.VAF_MULTIBLOCK_DUMMY_BLOCK.get()).build(null)
             );
 }

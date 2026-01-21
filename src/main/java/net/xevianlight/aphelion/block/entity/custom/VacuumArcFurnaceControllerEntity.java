@@ -61,6 +61,13 @@ public class VacuumArcFurnaceControllerEntity extends BlockEntity implements Men
     public static final int OUTPUT_SLOT = 2;
     public static final int ENERGY_SLOT = 3;
 
+    private boolean dirty = false;
+
+    @Override
+    public String getMenuTitle() {
+        return "Vacuum Arc Furnace";
+    }
+
     public VacuumArcFurnaceControllerEntity(BlockPos pos, BlockState blockState) {
         super(ModBlockEntities.VACUUM_ARC_FURNACE_ENTITY.get(), pos, blockState);
         this.data = new ContainerData() {
@@ -109,6 +116,14 @@ public class VacuumArcFurnaceControllerEntity extends BlockEntity implements Men
 
     public void tick(Level level, BlockPos pos, BlockState blockState) {
 
+        if (dirty) {
+            dirty = false;
+            BlockState current = level.getBlockState(pos);
+            MultiblockHelper.tryForm(level, current, pos, SHAPE, AphelionBlockStateProperties.FORMED);
+        }
+
+        BlockState newBlockState = level.getBlockState(pos);
+
         if (!blockState.getValue(AphelionBlockStateProperties.FORMED))
             return;
 
@@ -120,8 +135,8 @@ public class VacuumArcFurnaceControllerEntity extends BlockEntity implements Men
                 // Recipe detected! We have enough energy to process
                 progress++;
                 useEnergy();
-                level.setBlockAndUpdate(pos, blockState.setValue(ElectricArcFurnace.LIT, true));
-                setChanged(level, pos, blockState);
+                level.setBlockAndUpdate(pos, newBlockState.setValue(ElectricArcFurnace.LIT, true));
+                setChanged(level, pos, newBlockState);
 
                 if (hasCraftingFinished()) {
                     outputBlastingResult(INPUT_SLOT, OUTPUT_SLOT);
@@ -129,14 +144,14 @@ public class VacuumArcFurnaceControllerEntity extends BlockEntity implements Men
                 }
             } else if (hasFurnaceRecipe(INPUT_SLOT) && !hasEnoughEnergyToCraft(MACHINE_ENERGY_COST)) {
                 // Recipe detected but we ran out of power
-                level.setBlockAndUpdate(pos, blockState.setValue(ElectricArcFurnace.LIT, false));
-                setChanged(level, pos, blockState);
+                level.setBlockAndUpdate(pos, newBlockState.setValue(ElectricArcFurnace.LIT, false));
+                setChanged(level, pos, newBlockState);
                 progress = progress > 0 ? progress - 1 : 0;
             } else {
                 // Invalid recipe
                 resetProgress();
-                level.setBlockAndUpdate(pos, blockState.setValue(ElectricArcFurnace.LIT, false));
-                setChanged(level, pos, blockState);
+                level.setBlockAndUpdate(pos, newBlockState.setValue(ElectricArcFurnace.LIT, false));
+                setChanged(level, pos, newBlockState);
             }
         } else {
             // Secondary slot is NOT empty, try alloying recipes
@@ -145,8 +160,8 @@ public class VacuumArcFurnaceControllerEntity extends BlockEntity implements Men
                     // Alloy recipe detected! We have enough energy to process
                     progress++;
                     useEnergy();
-                    level.setBlockAndUpdate(pos, blockState.setValue(ElectricArcFurnace.LIT, true));
-                    setChanged(level, pos, blockState);
+                    level.setBlockAndUpdate(pos, newBlockState.setValue(ElectricArcFurnace.LIT, true));
+                    setChanged(level, pos, newBlockState);
 
                     if (hasCraftingFinished()) {
                         outputAlloyingResult(INPUT_SLOT, SECONDARY_INPUT_SLOT, OUTPUT_SLOT);
@@ -154,15 +169,15 @@ public class VacuumArcFurnaceControllerEntity extends BlockEntity implements Men
                     }
                 } else {
                     // Recipe detected but we ran out of power
-                    level.setBlockAndUpdate(pos, blockState.setValue(ElectricArcFurnace.LIT, false));
-                    setChanged(level, pos, blockState);
+                    level.setBlockAndUpdate(pos, newBlockState.setValue(ElectricArcFurnace.LIT, false));
+                    setChanged(level, pos, newBlockState);
                     progress = progress > 0 ? progress - 1 : 0;
                 }
             } else {
                 // Invalid recipe
                 resetProgress();
-                level.setBlockAndUpdate(pos, blockState.setValue(ElectricArcFurnace.LIT, false));
-                setChanged(level, pos, blockState);
+                level.setBlockAndUpdate(pos, newBlockState.setValue(ElectricArcFurnace.LIT, false));
+                setChanged(level, pos, newBlockState);
             }
         }
 
@@ -328,6 +343,11 @@ public class VacuumArcFurnaceControllerEntity extends BlockEntity implements Men
         return isFormed() ? fullHandler : emptyJeiHandler;
     }
 
+    @Override
+    public ModEnergyStorage getEnergy() {
+        return ENERGY_STORAGE;
+    }
+
     public IEnergyStorage getEnergyStorage(@Nullable Direction direction) {
         if (direction == null)
             return isFormed() ? ENERGY_STORAGE : NULL_ENERGY_STORAGE;
@@ -351,6 +371,7 @@ public class VacuumArcFurnaceControllerEntity extends BlockEntity implements Men
         };
     }
 
+    @Override
     public ItemStackHandler getInventory() {
         return inventory;
     }
@@ -416,15 +437,20 @@ public class VacuumArcFurnaceControllerEntity extends BlockEntity implements Men
         };
     }
 
+    @Override
+    public MultiblockHelper.ShapePart[] getMultiblockShape() {
+        return SHAPE;
+    }
+
     public static final MultiblockHelper.ShapePart[] SHAPE = new MultiblockHelper.ShapePart[] {
 
             //Layer -1
-        new MultiblockHelper.ShapePart(new BlockPos(1,-1,0), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
+        new MultiblockHelper.ShapePart(new BlockPos(1,-1,0), s -> s.is(ModBlocks.BLOCK_STEEL)),
         new MultiblockHelper.ShapePart(new BlockPos(1,-1,1), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
-        new MultiblockHelper.ShapePart(new BlockPos(1,-1,2), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
-        new MultiblockHelper.ShapePart(new BlockPos(-1,-1,0), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
+        new MultiblockHelper.ShapePart(new BlockPos(1,-1,2), s -> s.is(ModBlocks.BLOCK_STEEL)),
+        new MultiblockHelper.ShapePart(new BlockPos(-1,-1,0), s -> s.is(ModBlocks.BLOCK_STEEL)),
         new MultiblockHelper.ShapePart(new BlockPos(-1,-1,1), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
-        new MultiblockHelper.ShapePart(new BlockPos(-1,-1,2), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
+        new MultiblockHelper.ShapePart(new BlockPos(-1,-1,2), s -> s.is(ModBlocks.BLOCK_STEEL)),
         new MultiblockHelper.ShapePart(new BlockPos(0,-1,0), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
         new MultiblockHelper.ShapePart(new BlockPos(0,-1,1), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
         new MultiblockHelper.ShapePart(new BlockPos(0,-1,2), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
@@ -441,12 +467,12 @@ public class VacuumArcFurnaceControllerEntity extends BlockEntity implements Men
 
             //Layer 1
 
-        new MultiblockHelper.ShapePart(new BlockPos(1,1,0), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
+        new MultiblockHelper.ShapePart(new BlockPos(1,1,0), s -> s.is(ModBlocks.BLOCK_STEEL)),
         new MultiblockHelper.ShapePart(new BlockPos(1,1,1), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
-        new MultiblockHelper.ShapePart(new BlockPos(1,1,2), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
-        new MultiblockHelper.ShapePart(new BlockPos(-1,1,0), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
+        new MultiblockHelper.ShapePart(new BlockPos(1,1,2), s -> s.is(ModBlocks.BLOCK_STEEL)),
+        new MultiblockHelper.ShapePart(new BlockPos(-1,1,0), s -> s.is(ModBlocks.BLOCK_STEEL)),
         new MultiblockHelper.ShapePart(new BlockPos(-1,1,1), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
-        new MultiblockHelper.ShapePart(new BlockPos(-1,1,2), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
+        new MultiblockHelper.ShapePart(new BlockPos(-1,1,2), s -> s.is(ModBlocks.BLOCK_STEEL)),
         new MultiblockHelper.ShapePart(new BlockPos(0,1,0), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
         new MultiblockHelper.ShapePart(new BlockPos(0,1,1), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
         new MultiblockHelper.ShapePart(new BlockPos(0,1,2), s -> s.is(ModBlocks.ARC_FURNACE_CASING_BLOCK)),
@@ -493,15 +519,12 @@ public class VacuumArcFurnaceControllerEntity extends BlockEntity implements Men
         this.formed = formed;
         invalidateCapabilities();
         if (!formed) {
-            drops();
+//            drops();
         }
     }
 
-    private void setFormedState(boolean value) {
-        BlockState state = getBlockState();
-        if (state.hasProperty(ElectricArcFurnace.FORMED) && state.getValue(ElectricArcFurnace.FORMED) != value) {
-            level.setBlock(worldPosition, state.setValue(ElectricArcFurnace.FORMED, value), 3);
-        }
+    @Override
+    public void markDirty() {
+        dirty = true;
     }
-
 }

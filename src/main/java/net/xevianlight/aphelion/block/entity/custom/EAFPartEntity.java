@@ -3,10 +3,13 @@ package net.xevianlight.aphelion.block.entity.custom;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.xevianlight.aphelion.Aphelion;
 import net.xevianlight.aphelion.core.init.ModBlockEntities;
+import net.xevianlight.aphelion.util.IMultiblockController;
 import net.xevianlight.aphelion.util.IMultiblockPart;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,6 +23,21 @@ public class EAFPartEntity extends BlockEntity implements IMultiblockPart {
     public void setControllerPos(@Nullable BlockPos pos) {
         controllerPos = pos;
         setChanged();
+    }
+
+    @Override
+    public BlockState getMimicing() {
+        return null;
+    }
+
+    @Override
+    public void setMimicing(BlockState newState) {
+
+    }
+
+    @Override
+    public void onDummyBroken() {
+        Aphelion.LOGGER.error("I SHOULDNT BE CALLED!!!");
     }
 
     public @Nullable BlockPos getControllerPos() {
