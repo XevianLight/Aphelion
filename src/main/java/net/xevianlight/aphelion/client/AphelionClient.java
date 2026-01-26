@@ -1,5 +1,7 @@
 package net.xevianlight.aphelion.client;
 
+import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
@@ -11,10 +13,12 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.RegisterClientReloadListenersEvent;
 import net.neoforged.neoforge.client.event.RegisterDimensionSpecialEffectsEvent;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.xevianlight.aphelion.Aphelion;
 import net.xevianlight.aphelion.client.dimension.AphelionDimensionRenderers;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.function.BiConsumer;
 
@@ -23,6 +27,14 @@ import java.util.function.BiConsumer;
 // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
 @EventBusSubscriber(modid = Aphelion.MOD_ID, value = Dist.CLIENT)
 public class AphelionClient {
+
+    public static final KeyMapping ROCKET_LAUNCH_KEY = new KeyMapping(
+            "key.aphelion.rocket_launch",
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_SPACE,
+            "key.categories.aphelion"
+    );
+
     public AphelionClient(ModContainer container) {
         // Allows NeoForge to create a config screen for this mod's configs.
         // The config screen is accessed by going to the Mods screen > clicking on your mod > clicking on config.
@@ -53,5 +65,10 @@ public class AphelionClient {
                 ResourceLocation.fromNamespaceAndPath(Aphelion.MOD_ID, "space"),
                 new net.xevianlight.aphelion.client.dimension.SpaceSkyEffects(null)
         );
+    }
+
+    @SubscribeEvent
+    public static void registerKeys(RegisterKeyMappingsEvent event) {
+        event.register(ROCKET_LAUNCH_KEY);
     }
 }

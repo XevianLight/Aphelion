@@ -1,6 +1,5 @@
 package net.xevianlight.aphelion.commands;
 
-import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
@@ -8,24 +7,26 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.*;
+import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.coordinates.ColumnPosArgument;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentUtils;
-import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ColumnPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.RelativeMovement;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.xevianlight.aphelion.Aphelion;
 import net.xevianlight.aphelion.core.space.SpacePartitionSavedData;
 import net.xevianlight.aphelion.entites.vehicles.RocketEntity;
 import net.xevianlight.aphelion.util.RocketStructure;
 import net.xevianlight.aphelion.util.SpacePartitionHelper;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.EnumSet;
 
@@ -52,7 +53,7 @@ public class AphelionCommand {
                                                                     true
                                                             );
 
-                                                            return Command.SINGLE_SUCCESS;
+                                                            return 1;
                                                         })
                                                 )
                                         )
@@ -70,7 +71,7 @@ public class AphelionCommand {
                                                                     true
                                                             );
 
-                                                            return Command.SINGLE_SUCCESS;
+                                                            return 1;
                                                         })
                                                 )
                                         )
@@ -96,7 +97,7 @@ public class AphelionCommand {
                                                         );
                                                     }
 
-                                                    return Command.SINGLE_SUCCESS;
+                                                    return 1;
                                                 })
                                         )
                                 )
@@ -117,7 +118,7 @@ public class AphelionCommand {
                                                         );
                                                     }
 
-                                                    return Command.SINGLE_SUCCESS;
+                                                    return 1;
                                                 })
                                         )
                                         .then(Commands.literal("all")
@@ -131,7 +132,7 @@ public class AphelionCommand {
                                                             true
                                                     );
 
-                                                    return Command.SINGLE_SUCCESS;
+                                                    return 1;
                                                 })
                                         )
                                 )
@@ -146,22 +147,14 @@ public class AphelionCommand {
 
                                                             long key = SpacePartitionSavedData.pack(x,z);
 
-                                                            Component clickableOutput = Component.literal(String.valueOf(key))
-                                                                    .withStyle(style -> style
-                                                                            .withClickEvent(new ClickEvent(
-                                                                                    ClickEvent.Action.COPY_TO_CLIPBOARD,
-                                                                                    String.valueOf(key)
-                                                                            ))
-                                                                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click")))
-                                                                            .withColor(ChatFormatting.AQUA)
-                                                                    );
+                                                            Component clickableOutput = getClickableId(String.valueOf(key), ChatFormatting.AQUA);
 
                                                             context.getSource().sendSuccess(
                                                                     () -> Component.translatable("command.aphelion.station.orbit.debug.posToKey", x, z, clickableOutput),
                                                                     true
                                                             );
 
-                                                            return Command.SINGLE_SUCCESS;
+                                                            return 1;
                                                         })
                                                 )
                                         )
@@ -178,22 +171,14 @@ public class AphelionCommand {
 
                                                             String stationCoord = x + " " + z;
 
-                                                            Component clickableOutput = ComponentUtils.wrapInSquareBrackets(Component.literal(stationCoord))
-                                                                    .withStyle(style -> style
-                                                                            .withClickEvent(new ClickEvent(
-                                                                                    ClickEvent.Action.COPY_TO_CLIPBOARD,
-                                                                                    stationCoord
-                                                                            ))
-                                                                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click")))
-                                                                            .withColor(ChatFormatting.GREEN)
-                                                                    );
+                                                            Component clickableOutput = getClickablePos(stationCoord, ChatFormatting.GREEN);
 
                                                             context.getSource().sendSuccess(
                                                                     () -> Component.translatable("command.aphelion.station.orbit.debug.keyToPos", key, clickableOutput),
                                                                     true
                                                             );
 
-                                                            return Command.SINGLE_SUCCESS;
+                                                            return 1;
                                                         })
                                                 )
                                         )
@@ -206,22 +191,14 @@ public class AphelionCommand {
 
                                                             String stationCoord = SpacePartitionHelper.get(x) + " " + SpacePartitionHelper.get(z);
 
-                                                            Component clickableOutput = ComponentUtils.wrapInSquareBrackets(Component.literal(stationCoord))
-                                                                    .withStyle(style -> style
-                                                                            .withClickEvent(new ClickEvent(
-                                                                                    ClickEvent.Action.COPY_TO_CLIPBOARD,
-                                                                                    stationCoord
-                                                                            ))
-                                                                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click")))
-                                                                            .withColor(ChatFormatting.GREEN)
-                                                                    );
+                                                            Component clickableOutput = getClickablePos(stationCoord, ChatFormatting.GREEN);
 
                                                             context.getSource().sendSuccess(
                                                                     () -> Component.translatable("command.aphelion.station.orbit.debug.getPartition", x, z, clickableOutput),
                                                                     true
                                                             );
 
-                                                            return Command.SINGLE_SUCCESS;
+                                                            return 1;
                                                         })))
                                 )
                         )
@@ -241,25 +218,9 @@ public class AphelionCommand {
 
                                                     long key = SpacePartitionSavedData.pack((int) x, (int) z);
 
-                                                    Component clickablePos = ComponentUtils.wrapInSquareBrackets(Component.literal(stationCoord))
-                                                            .withStyle(style -> style
-                                                                    .withClickEvent(new ClickEvent(
-                                                                            ClickEvent.Action.COPY_TO_CLIPBOARD,
-                                                                            stationCoord
-                                                                    ))
-                                                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click")))
-                                                                    .withColor(ChatFormatting.GREEN)
-                                                            );
+                                                    Component clickablePos = getClickablePos(stationCoord, ChatFormatting.GREEN);
 
-                                                    Component clickableId = Component.literal(String.valueOf(key))
-                                                            .withStyle(style -> style
-                                                                    .withClickEvent(new ClickEvent(
-                                                                            ClickEvent.Action.COPY_TO_CLIPBOARD,
-                                                                            String.valueOf(key)
-                                                                    ))
-                                                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click")))
-                                                                    .withColor(ChatFormatting.AQUA)
-                                                            );
+                                                    Component clickableId = getClickableId(String.valueOf(key), ChatFormatting.AQUA);
 
                                                     ServerLevel space = player.getServer().getLevel(ResourceKey.create(Registries.DIMENSION, ResourceLocation.fromNamespaceAndPath(Aphelion.MOD_ID, "space")));
 
@@ -271,14 +232,14 @@ public class AphelionCommand {
                                                                 true
                                                         );
 
-                                                        return Command.SINGLE_SUCCESS;
+                                                        return 1;
                                                     }
 
                                                     context.getSource().sendFailure(
                                                             Component.translatable("command.aphelion.station.teleport.failure")
                                                     );
 
-                                                    return Command.SINGLE_SUCCESS;
+                                                    return 1;
                                                 })
                                         )
                                 )
@@ -292,7 +253,7 @@ public class AphelionCommand {
                                             var player = context.getSource().getEntity();
                                             if (player == null || player.getServer() == null) {
                                                 context.getSource().sendFailure(Component.translatable("command.aphelion.station.teleport.failure"));
-                                                return Command.SINGLE_SUCCESS;
+                                                return 1;
                                             }
 
                                             var targetDim = DimensionArgument.getDimension(context, "dimension");
@@ -301,12 +262,12 @@ public class AphelionCommand {
 
                                             if (targetLevel == null) {
                                                 context.getSource().sendFailure(Component.translatable("command.aphelion.station.teleport.failure.invalid_level"));
-                                                return Command.SINGLE_SUCCESS;
+                                                return 1;
                                             }
 
                                             player.teleportTo(targetLevel, player.position().x, player.position().y, player.position().z, EnumSet.noneOf(RelativeMovement.class), player.getYRot(), player.getXRot());
 
-                                            return Command.SINGLE_SUCCESS;
+                                            return 1;
                                         }))
                         )
                 )
@@ -317,8 +278,9 @@ public class AphelionCommand {
                                         s.add(0,0,0, Blocks.IRON_BLOCK.defaultBlockState());
                                     });
                                     context.getSource().sendSuccess(() -> Component.translatable("command.aphelion.rocket.spawn.success"), true);
+                                    assert context.getSource().getEntity() != null;
                                     RocketEntity rocket = RocketEntity.spawnRocket(context.getSource().getLevel(), context.getSource().getEntity().blockPosition(), structure);
-                                    return Command.SINGLE_SUCCESS;
+                                    return 1;
                                 })
                         )
                         .then(Commands.argument("entity", EntityArgument.entity())
@@ -334,7 +296,7 @@ public class AphelionCommand {
                                                             } else {
                                                                 context.getSource().sendFailure(Component.translatable("command.aphelion.rocket.entity_invalid"));
                                                             }
-                                                            return Command.SINGLE_SUCCESS;
+                                                            return 1;
                                                         })
                                                 )
                                         )
@@ -346,15 +308,7 @@ public class AphelionCommand {
                                                         RocketStructure structure = rocket.getStructure();
                                                         CompoundTag tag = structure.save();
 
-                                                        Component clickableId = Component.literal(tag.toString())
-                                                                .withStyle(style -> style
-                                                                        .withClickEvent(new ClickEvent(
-                                                                                ClickEvent.Action.COPY_TO_CLIPBOARD,
-                                                                                tag.toString()
-                                                                        ))
-                                                                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click")))
-                                                                        .withColor(ChatFormatting.AQUA)
-                                                                );
+                                                        Component clickableId = getClickableId(tag.toString(), ChatFormatting.AQUA);
 
                                                         context.getSource().sendSuccess(
                                                                 () -> clickableId,
@@ -363,13 +317,171 @@ public class AphelionCommand {
                                                     } else {
                                                         context.getSource().sendFailure(Component.translatable("command.aphelion.rocket.entity_invalid"));
                                                     }
-                                                    return Command.SINGLE_SUCCESS;
+                                                    return 1;
                                                 })
+                                        )
+                                )
+                                .then(Commands.literal("destination")
+                                        .then(Commands.literal("dimension")
+                                                .then(Commands.literal("set")
+                                                        .then(Commands.argument("dim", DimensionArgument.dimension())
+                                                                .executes(context -> {
+                                                                    Entity entity = EntityArgument.getEntity(context, "entity");
+
+                                                                    if (entity instanceof RocketEntity rocket) {
+                                                                        ResourceKey<Level> dim = DimensionArgument.getDimension(context,"dim").dimension();
+
+                                                                        rocket.setTargetDim(dim);
+
+                                                                        context.getSource().sendSuccess(() -> Component.translatable("command.aphelion.rocket.set_dim.success", dim.location().toString()),
+                                                                                true
+                                                                        );
+                                                                    } else {
+                                                                        context.getSource().sendFailure(Component.translatable("command.aphelion.rocket.entity_invalid"));
+                                                                    }
+
+
+                                                                    return 1;
+                                                                })
+                                                        )
+                                                )
+                                                .then(Commands.literal("get")
+                                                        .executes(context -> {
+                                                            Entity entity = EntityArgument.getEntity(context, "entity");
+
+                                                            if (entity instanceof RocketEntity rocket) {
+                                                                ResourceKey<Level> dim = rocket.getTargetDim();
+
+                                                                Component clickableId = getClickableId(dim.location().toString(), ChatFormatting.AQUA);
+
+                                                                context.getSource().sendSuccess(() -> Component.translatable("command.aphelion.rocket.get_dim.success", clickableId),
+                                                                        true
+                                                                );
+                                                            } else {
+                                                                context.getSource().sendFailure(Component.translatable("command.aphelion.rocket.entity_invalid"));
+                                                            }
+
+                                                            return 1;
+                                                        })
+                                                )
+                                        )
+                                        .then(Commands.literal("position")
+                                                .then(Commands.literal("set")
+                                                        .then(Commands.argument("pos", BlockPosArgument.blockPos())
+                                                                .executes(context -> {
+                                                                    Entity entity = EntityArgument.getEntity(context, "entity");
+
+                                                                    if (entity instanceof RocketEntity rocket) {
+                                                                        BlockPos pos = BlockPosArgument.getBlockPos(context, "pos");
+
+                                                                        rocket.setTargetPos(pos);
+
+                                                                        context.getSource().sendSuccess(() -> Component.translatable("command.aphelion.rocket.set_pos.success", pos.toString()),
+                                                                                true
+                                                                        );
+                                                                    } else {
+                                                                        context.getSource().sendFailure(Component.translatable("command.aphelion.rocket.entity_invalid"));
+                                                                    }
+
+                                                                    return 1;
+                                                                })
+                                                        )
+                                                )
+                                                .then(Commands.literal("get")
+                                                        .executes(context -> {
+                                                            Entity entity = EntityArgument.getEntity(context, "entity");
+
+                                                            if (entity instanceof RocketEntity rocket) {
+                                                                BlockPos pos = rocket.getTargetPos();
+
+                                                                if (pos == null) {
+                                                                    context.getSource().sendSuccess(() -> Component.translatable("command.aphelion.rocket.get_pos.success.null"), true);
+                                                                    return 1;
+                                                                }
+
+                                                                Component clickablePos = getClickablePos(pos.toShortString(), ChatFormatting.GREEN);
+
+                                                                context.getSource().sendSuccess(() -> Component.translatable("command.aphelion.rocket.get_pos.success", clickablePos),
+                                                                        true
+                                                                );
+                                                            } else {
+                                                                context.getSource().sendFailure(Component.translatable("command.aphelion.rocket.entity_invalid"));
+                                                            }
+
+                                                            return 1;
+                                                        })
+                                                )
+                                        )
+                                )
+                                .then(Commands.literal("launch")
+                                        .executes(context -> {
+                                            Entity entity = EntityArgument.getEntity(context, "entity");
+
+                                            if (entity instanceof RocketEntity rocket) {
+                                                rocket.launch();
+                                            } else {
+                                                context.getSource().sendFailure(Component.translatable("command.aphelion.rocket.entity_invalid"));
+                                            }
+                                            return 1;
+                                        })
+                                )
+                                .then(Commands.literal("launchTo")
+                                        .then(Commands.argument("dim", DimensionArgument.dimension())
+                                            .executes(context -> {
+                                                Entity entity = EntityArgument.getEntity(context, "entity");
+
+                                                if (entity instanceof RocketEntity rocket) {
+                                                    var dim = DimensionArgument.getDimension(context, "dim").dimension();
+
+                                                    rocket.launchTo(dim, null);
+                                                } else {
+                                                    context.getSource().sendFailure(Component.translatable("command.aphelion.rocket.entity_invalid"));
+                                                }
+                                                return 1;
+                                            })
+                                                .then(Commands.argument("pos", BlockPosArgument.blockPos())
+                                                        .executes(context -> {
+                                                            Entity entity = EntityArgument.getEntity(context, "entity");
+
+                                                            if (entity instanceof RocketEntity rocket) {
+                                                                var dim = DimensionArgument.getDimension(context, "dim").dimension();
+                                                                var pos = BlockPosArgument.getBlockPos(context, "pos");
+                                                                rocket.launchTo(dim, pos);
+                                                            } else {
+                                                                context.getSource().sendFailure(Component.translatable("command.aphelion.rocket.entity_invalid"));
+                                                            }
+                                                            return 1;
+                                                        })
+                                                )
                                         )
                                 )
                         )
                 )
 
         );
+    }
+
+    private static @NotNull Component getClickableId(String dim, ChatFormatting aqua) {
+        return Component.literal(dim)
+                .withStyle(style -> style
+                        .withClickEvent(new ClickEvent(
+                                ClickEvent.Action.COPY_TO_CLIPBOARD,
+                                dim
+                        ))
+                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click")))
+                        .withColor(aqua)
+                );
+    }
+
+    private static @NotNull Component getClickablePos(String pos, ChatFormatting green) {
+        return ComponentUtils.wrapInSquareBrackets(Component.literal(pos))
+                .withStyle(style -> style
+                        .withClickEvent(new ClickEvent(
+                                ClickEvent.Action.COPY_TO_CLIPBOARD,
+                                pos
+                        ))
+                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click")))
+                        .withColor(green)
+                );
     }
 }

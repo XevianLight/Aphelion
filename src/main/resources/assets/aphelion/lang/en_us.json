@@ -42,5 +42,10 @@
   "command.aphelion.station.teleport.failure.invalid_level": "Failed to teleport, target level is null",
   "command.aphelion.station.orbit.debug.getPartition": "Partition of %s, %s is %s",
   "command.aphelion.rocket.entity_invalid": "Entity is not a valid rocket",
-  "command.aphelion.rocket.spawn.success": "Summoned new rocket"
+  "command.aphelion.rocket.spawn.success": "Summoned new rocket",
+  "command.aphelion.rocket.set_dim.success": "Set target dimension of rocket to %s",
+  "command.aphelion.rocket.get_dim.success": "Target dimension of rocket is %s",
+  "command.aphelion.rocket.set_pos.success": "Set target position of rocket to %s",
+  "command.aphelion.rocket.get_pos.success": "Target position of rocket is %s",
+  "command.aphelion.rocket.get_pos.success.null": "Target position of rocket is not set"
 }

@@ -1,30 +1,67 @@
 package net.xevianlight.aphelion.entites.vehicles;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ColumnPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.vehicle.VehicleEntity;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.entity.IEntityWithComplexSpawn;
 import net.neoforged.neoforge.fluids.FluidType;
+import net.xevianlight.aphelion.Aphelion;
+import net.xevianlight.aphelion.core.KeyVariables;
 import net.xevianlight.aphelion.core.init.ModEntities;
 import net.xevianlight.aphelion.util.RocketStructure;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public class RocketEntity extends Entity implements IEntityWithComplexSpawn {
+import java.util.List;
+import java.util.Objects;
+
+public class RocketEntity extends VehicleEntity implements IEntityWithComplexSpawn {
 
     RocketStructure structure = new RocketStructure(s -> {
         s.add(0,0,0, Blocks.NETHERITE_BLOCK.defaultBlockState());
         s.add(0,1,0, Blocks.NETHERITE_BLOCK.defaultBlockState());
         s.add(0,2,0, Blocks.NETHERITE_BLOCK.defaultBlockState());
     });
+
+    public enum FlightPhase { IDLE, PREPARE, ASCEND, TRANSIT, DESCEND, LANDED}
+    private ResourceKey<Level> targetDim = ResourceKey.create(Registries.DIMENSION, Aphelion.id("test"));
+    private @Nullable BlockPos targetPos = null;
+
+    private double landingPosX;
+    private double landingPosZ;
+
+    private static final double TELEPORT_Y = 600.0;
+    private static final double ASCEND_ACCEL = 0.05;
+    private static final double DESCEND_SPEED = 2;
+
+    private double yVel = 0.0;
+    private boolean jumpWasDown = false;
+
+    private static final EntityDataAccessor<Byte> FLIGHT_PHASE =
+            SynchedEntityData.defineId(RocketEntity.class, EntityDataSerializers.BYTE);
 
     private static final EntityDataAccessor<CompoundTag> STRUCTURE_TAG =
             SynchedEntityData.defineId(RocketEntity.class, EntityDataSerializers.COMPOUND_TAG);
@@ -48,6 +85,183 @@ public class RocketEntity extends Entity implements IEntityWithComplexSpawn {
         return rocket;
     }
 
+    public void launchTo(ResourceKey<Level> dim, @Nullable BlockPos pos) {
+        if (level().isClientSide) return;
+
+        this.targetDim = dim;
+        this.targetPos = pos;
+
+        setPhase(FlightPhase.PREPARE);
+    }
+
+    public void launch() {
+        if (level().isClientSide) return;
+        if (targetDim == null) return;
+        if (targetDim == this.level().dimension() && targetPos == null) return;
+        setPhase(FlightPhase.PREPARE);
+    }
+
+    public Player getFirstPlayerPassenger() {
+        if (!this.getPassengers().isEmpty()) {
+            for (int i = 0; i < this.getPassengers().size(); i++) {
+                if (this.getPassengers().get(i) instanceof Player player) {
+                    return player;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+
+        if (!level().isClientSide) {
+
+            switch (getPhase()) {
+                case IDLE, LANDED -> tickIdle();
+                case PREPARE -> tickPrepare();
+                case ASCEND -> tickAscend();
+                case TRANSIT -> {
+                    try {
+                        tickTransit();
+                    } catch (AphelionRocketDimensionChangeException e) {
+                        Aphelion.LOGGER.error("Rocket dimension transfer failed!", e);
+                        setPhase(FlightPhase.IDLE);
+                        resetDeltaMovement();
+                    }
+                }
+                case DESCEND -> tickDescend();
+            }
+            // Simple upward movement
+
+        }
+
+        move(MoverType.SELF, getDeltaMovement());
+    }
+
+    private void tickIdle() {
+        resetDeltaMovement();
+    }
+
+    private void tickPrepare() {
+//        if (targetDim == this.level().dimension()) {
+//            setPhase(FlightPhase.IDLE);
+//            Aphelion.LOGGER.info("Target dimension matches current dimension");
+//            return;
+//        }
+        setPhase(FlightPhase.ASCEND);
+    }
+
+    private void tickAscend() {
+        setDeltaMovement(0, yVel, 0);
+        yVel += ASCEND_ACCEL;
+
+        if (getY() >= TELEPORT_Y) {
+            resetDeltaMovement();
+            setPhase(FlightPhase.TRANSIT);
+        }
+    }
+
+    private void tickTransit() throws AphelionRocketDimensionChangeException {
+        if (!(level() instanceof ServerLevel src)) {
+            setPhase(FlightPhase.IDLE);
+            return;
+        }
+        if (targetDim == null) {
+            setPhase(FlightPhase.IDLE);
+            return;
+        }
+
+        ServerLevel dst = src.getServer().getLevel(targetDim);
+        if (dst == null) {
+            setPhase(FlightPhase.IDLE);
+            return;
+        }
+
+        // Set destination position to rockets current position OR defined landing coordinates
+        if (targetPos != null) {
+            landingPosX = targetPos.getX() + 0.5d;
+            landingPosZ = targetPos.getZ() + 0.5d;
+        } else {
+            landingPosX = getX();
+            landingPosZ = getZ();
+        }
+
+        // Compute landing Y in destination
+        int hx = (int) Math.floor(landingPosX);
+        int hz = (int) Math.floor(landingPosZ);
+
+        double arrivalY = TELEPORT_Y;
+
+        var passengers = List.copyOf(getPassengers());
+
+        // Dismount before changing dims
+        ejectPassengers();
+
+        RocketEntity movedRocket = (RocketEntity) this.changeDimension(new DimensionTransition(
+                dst,
+                new Vec3(landingPosX, TELEPORT_Y, landingPosZ),
+                Vec3.ZERO,
+                getYRot(),
+                getXRot(),
+                DimensionTransition.PLAY_PORTAL_SOUND
+        ));
+
+        if (movedRocket == null) {
+            throw new AphelionRocketDimensionChangeException(targetDim.location().toString());
+        }
+
+        movedRocket.moveTo(landingPosX, arrivalY, landingPosZ, getYRot(), getXRot());
+        movedRocket.resetDeltaMovement();
+
+        for (Entity p : passengers) {
+            if (p instanceof ServerPlayer sp) {
+                sp.teleportTo(dst, landingPosX, arrivalY, landingPosZ, sp.getYRot(), sp.getXRot());
+                sp.startRiding(movedRocket, true);
+            } else {
+                Entity movedP = p.changeDimension(new DimensionTransition(
+                        dst,
+                        new Vec3(landingPosX, TELEPORT_Y, landingPosZ),
+                        Vec3.ZERO,
+                        getYRot(),
+                        getXRot(),
+                        DimensionTransition.PLAY_PORTAL_SOUND
+                ));
+                if (movedP !=  null) {
+                    movedP.moveTo(landingPosX, arrivalY, landingPosZ, movedP.getYRot(), movedP.getXRot());
+                    movedP.startRiding(movedRocket, true);
+                }
+            }
+        }
+
+        movedRocket.setPhase(FlightPhase.DESCEND);
+        movedRocket.targetDim = targetDim;
+        movedRocket.targetPos = targetPos;
+        movedRocket.landingPosX = landingPosX;
+        movedRocket.landingPosZ = landingPosZ;
+        yVel = 0;
+    }
+
+    private void tickDescend() {
+        if (isOnGround()) {
+            resetDeltaMovement();
+            setPhase(FlightPhase.LANDED);
+            return;
+        }
+        setDeltaMovement(0, -DESCEND_SPEED, 0);
+    }
+
+    private boolean isOnGround() {
+        BlockPos below = BlockPos.containing(getX(), getBoundingBox().minY - 0.01, getZ());
+        return !level().getBlockState(below).isAir();
+    }
+
+    private void resetDeltaMovement() {
+        setDeltaMovement(0,0,0);
+    }
+
     public RocketStructure getStructure() {
         return structure;
     }
@@ -57,18 +271,41 @@ public class RocketEntity extends Entity implements IEntityWithComplexSpawn {
     }
 
     @Override
-    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+    protected void defineSynchedData(@NotNull SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
         builder.define(STRUCTURE_TAG, new CompoundTag());
+        builder.define(FLIGHT_PHASE, (byte) FlightPhase.IDLE.ordinal());
+    }
+
+    public FlightPhase getPhase() {
+        int idx = this.entityData.get(FLIGHT_PHASE);
+        FlightPhase[] values = FlightPhase.values();
+        if (idx < 0 || idx >= values.length) return FlightPhase.IDLE;
+        return values[idx];
+    }
+
+    public void setPhase(FlightPhase phase) {
+        this.entityData.set(FLIGHT_PHASE, (byte) phase.ordinal());
+    }
+
+    @Override
+    protected @NotNull Item getDropItem() {
+        return Items.AIR;
     }
 
     public void setStructure(RocketStructure structure) {
+        double x = getX(), y = getY(), z = getZ();
+        float yRot = getYRot(), xRot = getXRot();
 
         this.structure.clear();
-        CompoundTag tag = structure.save();
-        this.structure.load(tag);
+        this.structure.load(structure.save());
+
         this.refreshDimensions();
         this.setBoundingBox(this.makeBoundingBox());
-        // sync to clients
+
+        // prevent any internal “snap” from sticking
+        this.moveTo(x, y, z, yRot, xRot);
+
         if (!level().isClientSide) {
             this.entityData.set(STRUCTURE_TAG, this.structure.save());
         }
@@ -77,9 +314,38 @@ public class RocketEntity extends Entity implements IEntityWithComplexSpawn {
     @Override
     public void onSyncedDataUpdated(@NotNull EntityDataAccessor<?> key) {
         super.onSyncedDataUpdated(key);
+
+        if (FLIGHT_PHASE.equals(key)) {
+            FlightPhase phase = getPhase();
+            handleClientFlightPhaseChange(phase);
+        }
+
         if (STRUCTURE_TAG.equals(key)) {
             CompoundTag tag = this.entityData.get(STRUCTURE_TAG);
             this.applyStructureTag(tag);
+        }
+    }
+
+    private void handleClientFlightPhaseChange(FlightPhase phase) {
+        switch (phase) {
+            case IDLE -> {
+//                var x = 0;
+            }
+            case PREPARE -> {
+//                var x = 1;
+            }
+            case ASCEND -> {
+//                var x = 2;
+            }
+            case TRANSIT -> {
+//                var x = 3;
+            }
+            case DESCEND -> {
+//                var x = 4;
+            }
+            case LANDED -> {
+//                var x = 5;
+            }
         }
     }
 
@@ -88,12 +354,67 @@ public class RocketEntity extends Entity implements IEntityWithComplexSpawn {
         if (tag.contains("RocketStructure")) {
             CompoundTag rocketTag = tag.getCompound("RocketStructure");
             structure.load(rocketTag);
+
+            // Immediately apply correct bbox on load (server + client)
+            double x = getX(), y = getY(), z = getZ();
+            float yRot = getYRot(), xRot = getXRot();
+
+            refreshDimensions();
+            setBoundingBox(makeBoundingBox());
+
+            moveTo(x, y, z, yRot, xRot);
+        }
+        if (tag.contains("TargetDim", Tag.TAG_STRING)) {
+            ResourceLocation rl = ResourceLocation.tryParse(tag.getString("TargetDim"));
+            if (rl != null) {
+                targetDim = ResourceKey.create(Registries.DIMENSION, rl);
+            } else {
+                targetDim = null;
+            }
+        } else {
+            targetDim = null;
+        }
+        if (tag.contains("TargetPos", Tag.TAG_LONG)) {
+            targetPos = BlockPos.of(tag.getLong("TargetPos"));
+        } else {
+            targetPos = null;
+        }
+
+        landingPosX = tag.getDouble("LandingX");
+        landingPosZ = tag.getDouble("LandingZ");
+
+        if (tag.contains("FlightPhase", Tag.TAG_BYTE)) {
+            setPhase(FlightPhase.values()[tag.getByte("FlightPhase")]);
         }
     }
 
     @Override
     protected void addAdditionalSaveData(CompoundTag tag) {
         tag.put("RocketStructure", structure.save());
+        if (targetDim != null)
+            tag.putString("TargetDim", targetDim.location().toString());
+        if (targetPos != null)
+            tag.putLong("TargetPos", targetPos.asLong());
+        tag.putByte("FlightPhase", (byte) getPhase().ordinal());
+
+        tag.putDouble("LandingX", landingPosX);
+        tag.putDouble("LandingZ", landingPosZ);
+    }
+
+    public BlockPos getTargetPos() {
+        return targetPos;
+    }
+
+    public void setTargetPos(@Nullable BlockPos targetPos) {
+        this.targetPos = targetPos;
+    }
+
+    public ResourceKey<Level> getTargetDim() {
+        return targetDim;
+    }
+
+    public void setTargetDim(ResourceKey<Level> targetDim) {
+        this.targetDim = targetDim;
     }
 
     @Override
@@ -130,25 +451,24 @@ public class RocketEntity extends Entity implements IEntityWithComplexSpawn {
         return computeWorldAABBFromStructure();
     }
 
-    @Override @NotNull
-    public EntityDimensions getDimensions(@NotNull Pose pose) {
-        // Example: dynamic size you already compute for your rocket
-        EntityDimensions base = EntityDimensions.scalable(1, 1);
-
-        // Put “eyes” near the top (1 block below top here)
-        return base.withEyeHeight(0);
+    @Override
+    public @NotNull EntityDimensions getDimensions(@NotNull Pose pose) {
+        RocketStructure.Extents e = structure.computeExtents();
+        AABB local = e.toLocalAABB(); // local coords
+        float w = (float) Math.max(local.getXsize(), local.getZsize());
+        float h = (float) local.getYsize();
+        return EntityDimensions.scalable(w, h).withEyeHeight(Math.max(0.1f, h - 0.2f));
     }
 
     @Override
-    public void tick() {
-        super.tick();
+    protected void positionRider(@NotNull Entity passenger, @NotNull MoveFunction moveFunction) {
+        if (!this.hasPassenger(passenger)) return;
 
-        if (!level().isClientSide) {
-            // Simple upward movement
-            setDeltaMovement(0, 0, 0);
-        }
+        // Choose a stable seat position relative to the rocket.
+        // Example: centered, and 1.5 blocks above your base Y.
+        Vec3 seat = new Vec3(this.getX(), this.getY() + structure.computeExtents().toLocalAABB().getYsize() / 2, this.getZ());
 
-        move(MoverType.SELF, getDeltaMovement());
+        moveFunction.accept(passenger, seat.x, seat.y, seat.z);
     }
 
     @Override
@@ -178,13 +498,26 @@ public class RocketEntity extends Entity implements IEntityWithComplexSpawn {
     }
 
     @Override
-    public boolean hurt(DamageSource source, float amount) {
-        return super.hurt(source, amount);
+    public boolean hurt(@NotNull DamageSource source, float amount) {
+        return false;
     }
 
     @Override
     public boolean isPickable() {
         return true;
+    }
+
+    @Override
+    protected boolean canAddPassenger(@NotNull Entity passenger) {
+        return passenger instanceof Player && getPassengers().isEmpty();
+    }
+
+    @Override
+    public @NotNull InteractionResult interact(@NotNull Player player, @NotNull InteractionHand hand) {
+        if (!level().isClientSide) {
+            player.startRiding(this);
+        }
+        return InteractionResult.sidedSuccess(level().isClientSide);
     }
 
 }

@@ -2,6 +2,7 @@ package net.xevianlight.aphelion.entites.vehicles;
 
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -31,6 +32,10 @@ public class RocketRenderer extends EntityRenderer<RocketEntity> {
 
         RocketStructure s = entity.getStructure();
 
+        poseStack.pushPose();
+
+        poseStack.mulPose(Axis.YP.rotationDegrees(-entityYaw));
+
         for (int i = 0; i < s.size(); i++) {
             int p = s.packedPosAt(i);
 
@@ -52,6 +57,7 @@ public class RocketRenderer extends EntityRenderer<RocketEntity> {
             poseStack.popPose();
         }
 
+        poseStack.popPose();
 
         super.render(entity, entityYaw, partialTicks, poseStack, buffers, packedLight);
     }

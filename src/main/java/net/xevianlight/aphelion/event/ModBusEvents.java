@@ -15,8 +15,10 @@ import net.xevianlight.aphelion.block.entity.custom.ElectricArcFurnaceEntity;
 import net.xevianlight.aphelion.block.entity.custom.TestBlockEntity;
 import net.xevianlight.aphelion.block.entity.custom.VacuumArcFurnaceControllerEntity;
 import net.xevianlight.aphelion.core.init.ModBlockEntities;
+import net.xevianlight.aphelion.network.RocketPayloadHandlers;
 import net.xevianlight.aphelion.network.ServerPayloadHandler;
 import net.xevianlight.aphelion.network.packet.PartitionData;
+import net.xevianlight.aphelion.network.packet.RocketLaunchPayload;
 
 @EventBusSubscriber(modid = Aphelion.MOD_ID)
 public class ModBusEvents {
@@ -40,7 +42,14 @@ public class ModBusEvents {
         registrar.playToClient(
                 PartitionData.TYPE,
                 PartitionData.STREAM_CODEC,
-                ServerPayloadHandler::handleDataOnMain);
+                ServerPayloadHandler::handleDataOnMain
+        );
+
+        registrar.playToServer(
+                RocketLaunchPayload.TYPE,
+                RocketLaunchPayload.STREAM_CODEC,
+                RocketPayloadHandlers::handleRocketLaunch
+        );
 
     }
 }

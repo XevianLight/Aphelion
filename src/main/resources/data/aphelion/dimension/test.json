@@ -2,10 +2,10 @@
   "type": "aphelion:test",
   "generator": {
     "type": "minecraft:noise",
+    "settings": "minecraft:overworld",
     "biome_source": {
-      "type": "minecraft:fixed",
-      "biome": "aphelion:test"
-    },
-    "settings": "aphelion:test"
+      "type": "minecraft:multi_noise",
+      "preset": "minecraft:overworld"
+    }
   }
 }
