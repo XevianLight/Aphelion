@@ -40,5 +40,9 @@ public class ModBlockTagProvider extends BlockTagsProvider {
 
         tag(ModTags.Blocks.STORAGE_BLOCKS)
                 .add(ModBlocks.BLOCK_STEEL.get());
+
+        tag(ModTags.Blocks.LAUNCH_PAD)
+                .add(ModBlocks.LAUNCH_PAD.get());
+
     }
 }

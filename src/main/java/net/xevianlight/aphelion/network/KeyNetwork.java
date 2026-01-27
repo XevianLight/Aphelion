@@ -22,6 +22,8 @@ public final class KeyNetwork {
 
         // consumeClick makes it fire once per press, not every tick held
         if (AphelionClient.ROCKET_LAUNCH_KEY.consumeClick() && mc.player.getVehicle() instanceof RocketEntity rocket) {
+
+            // Send a packet to the server telling it to try launching the rocket matching this id. The packet only contains the rocketId as an integer.
             PacketDistributor.sendToServer(new RocketLaunchPayload(rocket.getId()));
         }
     }

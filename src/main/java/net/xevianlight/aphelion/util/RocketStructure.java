@@ -2,7 +2,9 @@ package net.xevianlight.aphelion.util;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.*;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -134,5 +136,38 @@ public final class RocketStructure {
         }
 
         return new Extents(minX, minY, minZ, maxX, maxY, maxZ);
+    }
+
+    public static RocketStructure capture(Level level, BlockPos origin, int rx, int ry, int rz) {
+        return new RocketStructure(s -> {
+            for (int dy = -ry; dy <= ry; dy++) {
+                for (int dx = -rx; dx <= rx; dx++) {
+                    for (int dz = -rz; dz <= rz; dz++) {
+                        BlockPos p = origin.offset(dx, dy, dz);
+                        BlockState st = level.getBlockState(p);
+
+                        // Skip air and unbreakables/forbidden blocks as you like
+                        if (st.isAir()) continue;
+
+                        // Optional: ignore the assembler block itself
+                        // if (p.equals(origin)) continue;
+
+                        s.add(dx, dy, dz, st);
+                    }
+                }
+            }
+        });
+    }
+
+    public static void clearCaptured(Level level, BlockPos origin, RocketStructure struct) {
+        for (int i = 0; i < struct.size(); i++) {
+            int packed = struct.packedPosAt(i);
+            int dx = RocketStructure.unpackX(packed);
+            int dy = RocketStructure.unpackY(packed);
+            int dz = RocketStructure.unpackZ(packed);
+
+            BlockPos wp = origin.offset(dx, dy, dz);
+            level.setBlock(wp, Blocks.AIR.defaultBlockState(), 3);
+        }
     }
 }

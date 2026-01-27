@@ -1,5 +1,6 @@
 package net.xevianlight.aphelion.entites.vehicles;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -10,7 +11,6 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ColumnPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -29,14 +29,12 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.entity.IEntityWithComplexSpawn;
 import net.neoforged.neoforge.fluids.FluidType;
 import net.xevianlight.aphelion.Aphelion;
-import net.xevianlight.aphelion.core.KeyVariables;
 import net.xevianlight.aphelion.core.init.ModEntities;
 import net.xevianlight.aphelion.util.RocketStructure;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Objects;
 
 public class RocketEntity extends VehicleEntity implements IEntityWithComplexSpawn {
 
@@ -53,12 +51,11 @@ public class RocketEntity extends VehicleEntity implements IEntityWithComplexSpa
     private double landingPosX;
     private double landingPosZ;
 
-    private static final double TELEPORT_Y = 600.0;
-    private static final double ASCEND_ACCEL = 0.05;
-    private static final double DESCEND_SPEED = 2;
+    private static final double TELEPORT_Y = 1000.0;
+    private static final double ASCEND_ACCEL = 0.0125;
+    private static final double DESCEND_SPEED = 1;
 
     private double yVel = 0.0;
-    private boolean jumpWasDown = false;
 
     private static final EntityDataAccessor<Byte> FLIGHT_PHASE =
             SynchedEntityData.defineId(RocketEntity.class, EntityDataSerializers.BYTE);
@@ -101,18 +98,6 @@ public class RocketEntity extends VehicleEntity implements IEntityWithComplexSpa
         setPhase(FlightPhase.PREPARE);
     }
 
-    public Player getFirstPlayerPassenger() {
-        if (!this.getPassengers().isEmpty()) {
-            for (int i = 0; i < this.getPassengers().size(); i++) {
-                if (this.getPassengers().get(i) instanceof Player player) {
-                    return player;
-                }
-            }
-        }
-
-        return null;
-    }
-
     @Override
     public void tick() {
         super.tick();
@@ -146,11 +131,6 @@ public class RocketEntity extends VehicleEntity implements IEntityWithComplexSpa
     }
 
     private void tickPrepare() {
-//        if (targetDim == this.level().dimension()) {
-//            setPhase(FlightPhase.IDLE);
-//            Aphelion.LOGGER.info("Target dimension matches current dimension");
-//            return;
-//        }
         setPhase(FlightPhase.ASCEND);
     }
 
@@ -188,10 +168,6 @@ public class RocketEntity extends VehicleEntity implements IEntityWithComplexSpa
             landingPosX = getX();
             landingPosZ = getZ();
         }
-
-        // Compute landing Y in destination
-        int hx = (int) Math.floor(landingPosX);
-        int hz = (int) Math.floor(landingPosZ);
 
         double arrivalY = TELEPORT_Y;
 
@@ -326,26 +302,24 @@ public class RocketEntity extends VehicleEntity implements IEntityWithComplexSpa
         }
     }
 
+    private RocketEngineSound ascendLoopSound;
+
     private void handleClientFlightPhaseChange(FlightPhase phase) {
         switch (phase) {
-            case IDLE -> {
-//                var x = 0;
-            }
-            case PREPARE -> {
-//                var x = 1;
+            case IDLE, PREPARE, TRANSIT, DESCEND, LANDED -> {
+                    Aphelion.LOGGER.info("Rocket state updated to {}", phase);
+                if (ascendLoopSound != null) {
+                    ascendLoopSound.killSound();
+                    ascendLoopSound = null;
+                }
             }
             case ASCEND -> {
-//                var x = 2;
+                if (ascendLoopSound == null || ascendLoopSound.isStopped()) {
+                    ascendLoopSound = new RocketEngineSound(this);
+                    Minecraft.getInstance().getSoundManager().play(ascendLoopSound);
+                }
             }
-            case TRANSIT -> {
-//                var x = 3;
-            }
-            case DESCEND -> {
-//                var x = 4;
-            }
-            case LANDED -> {
-//                var x = 5;
-            }
+
         }
     }
 
@@ -382,6 +356,7 @@ public class RocketEntity extends VehicleEntity implements IEntityWithComplexSpa
 
         landingPosX = tag.getDouble("LandingX");
         landingPosZ = tag.getDouble("LandingZ");
+        yVel = tag.getDouble("yVelocity");
 
         if (tag.contains("FlightPhase", Tag.TAG_BYTE)) {
             setPhase(FlightPhase.values()[tag.getByte("FlightPhase")]);
@@ -399,9 +374,10 @@ public class RocketEntity extends VehicleEntity implements IEntityWithComplexSpa
 
         tag.putDouble("LandingX", landingPosX);
         tag.putDouble("LandingZ", landingPosZ);
+        tag.putDouble("yVelocity", yVel);
     }
 
-    public BlockPos getTargetPos() {
+    public @Nullable BlockPos getTargetPos() {
         return targetPos;
     }
 

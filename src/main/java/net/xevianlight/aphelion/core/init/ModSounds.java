@@ -23,6 +23,8 @@ public class ModSounds {
     public static final Supplier<SoundEvent> BIT_SHIFT = registerSoundEvent("bit_shift");
     public static final  ResourceKey<JukeboxSong> BIT_SHIFT_KEY = createSong("bit_shift");
 
+    public static final Supplier<SoundEvent> ROCKET_ENGINE = registerSoundEvent("rocket_engine");
+
     private static Supplier<SoundEvent> registerSoundEvent(String name) {
         ResourceLocation id = ResourceLocation.fromNamespaceAndPath(Aphelion.MOD_ID, name);
         return SOUND_EVENTS.register(name, () -> SoundEvent.createVariableRangeEvent(id));

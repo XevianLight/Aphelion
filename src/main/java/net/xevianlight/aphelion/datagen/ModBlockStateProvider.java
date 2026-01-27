@@ -27,6 +27,10 @@ public class ModBlockStateProvider extends BlockStateProvider {
 
         blockWithItem(ModBlocks.BLOCK_STEEL);
         blockWithItem(ModBlocks.DIMENSION_CHANGER);
+
+//        this is already defined ourselves
+//        blockItem(ModBlocks.LAUNCH_PAD);
+
         blockItem(ModBlocks.ARC_FURNACE_CASING_BLOCK);
     }
 

@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "north=true,east=true,south=true,west=true": { "model": "aphelion:block/launch_pad/0000" },
+    "north=false,east=true,south=true,west=true": { "model": "aphelion:block/launch_pad/1000" },
+    "north=true,east=false,south=true,west=true": { "model": "aphelion:block/launch_pad/0100" },
+    "north=true,east=true,south=false,west=true": { "model": "aphelion:block/launch_pad/0010" },
+    "north=true,east=true,south=true,west=false": { "model": "aphelion:block/launch_pad/0001" },
+    "north=false,east=false,south=true,west=true": { "model": "aphelion:block/launch_pad/1100" },
+    "north=false,east=true,south=false,west=true": { "model": "aphelion:block/launch_pad/1010" },
+    "north=false,east=true,south=true,west=false": { "model": "aphelion:block/launch_pad/1001" },
+    "north=true,east=false,south=false,west=true": { "model": "aphelion:block/launch_pad/0110" },
+    "north=true,east=false,south=true,west=false": { "model": "aphelion:block/launch_pad/0101" },
+    "north=true,east=true,south=false,west=false": { "model": "aphelion:block/launch_pad/0011" },
+    "north=false,east=false,south=false,west=true": { "model": "aphelion:block/launch_pad/1110" },
+    "north=false,east=false,south=true,west=false": { "model": "aphelion:block/launch_pad/1101" },
+    "north=false,east=true,south=false,west=false": { "model": "aphelion:block/launch_pad/1011" },
+    "north=true,east=false,south=false,west=false": { "model": "aphelion:block/launch_pad/0111" },
+    "north=false,east=false,south=false,west=false": { "model": "aphelion:block/launch_pad/1111" }
+  }
+}

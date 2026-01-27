@@ -41,5 +41,6 @@ public class ModCreativeTabs {
                         output.accept(ModItems.BLOCK_STEEL);
                         output.accept(ModItems.ARC_FURNACE_CASING_BLOCK);
                         output.accept(ModItems.VACUUM_ARC_FURNACE_CONTROLLER);
+                        output.accept(ModItems.LAUNCH_PAD);
                     }).build());
 }

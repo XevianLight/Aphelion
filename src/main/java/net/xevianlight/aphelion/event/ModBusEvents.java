@@ -5,19 +5,17 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
-import net.neoforged.neoforge.network.handlers.ClientPayloadHandler;
 import net.neoforged.neoforge.network.registration.HandlerThread;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.xevianlight.aphelion.Aphelion;
 import net.xevianlight.aphelion.block.dummy.entity.BaseMultiblockDummyBlockEntity;
-import net.xevianlight.aphelion.block.dummy.entity.VAFMultiblockDummyBlockEntity;
 import net.xevianlight.aphelion.block.entity.custom.ElectricArcFurnaceEntity;
 import net.xevianlight.aphelion.block.entity.custom.TestBlockEntity;
 import net.xevianlight.aphelion.block.entity.custom.VacuumArcFurnaceControllerEntity;
 import net.xevianlight.aphelion.core.init.ModBlockEntities;
 import net.xevianlight.aphelion.network.RocketPayloadHandlers;
-import net.xevianlight.aphelion.network.ServerPayloadHandler;
-import net.xevianlight.aphelion.network.packet.PartitionData;
+import net.xevianlight.aphelion.network.PartitionPayloadHandler;
+import net.xevianlight.aphelion.network.packet.PartitionPayload;
 import net.xevianlight.aphelion.network.packet.RocketLaunchPayload;
 
 @EventBusSubscriber(modid = Aphelion.MOD_ID)
@@ -40,9 +38,9 @@ public class ModBusEvents {
                 .executesOn(HandlerThread.MAIN);
 
         registrar.playToClient(
-                PartitionData.TYPE,
-                PartitionData.STREAM_CODEC,
-                ServerPayloadHandler::handleDataOnMain
+                PartitionPayload.TYPE,
+                PartitionPayload.STREAM_CODEC,
+                PartitionPayloadHandler::handleDataOnMain
         );
 
         registrar.playToServer(

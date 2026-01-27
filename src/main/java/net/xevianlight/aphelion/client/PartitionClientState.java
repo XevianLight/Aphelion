@@ -1,15 +1,15 @@
 package net.xevianlight.aphelion.client;
 
-import net.xevianlight.aphelion.network.packet.PartitionData;
+import net.xevianlight.aphelion.network.packet.PartitionPayload;
 
 import java.util.Optional;
 
 public final class PartitionClientState {
-    private static volatile PartitionData last = null;
+    private static volatile PartitionPayload last = null;
 
-    public static void set(PartitionData d) { last = d; }
+    public static void set(PartitionPayload d) { last = d; }
 
-    public static Optional<PartitionData> get() {
+    public static Optional<PartitionPayload> get() {
         return Optional.ofNullable(last);
     }
 

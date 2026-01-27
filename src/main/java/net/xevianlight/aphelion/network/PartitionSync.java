@@ -9,28 +9,18 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.xevianlight.aphelion.Aphelion;
 import net.xevianlight.aphelion.core.space.SpacePartitionSavedData;
-import net.xevianlight.aphelion.network.packet.PartitionData;
+import net.xevianlight.aphelion.network.packet.PartitionPayload;
 import net.xevianlight.aphelion.util.SpacePartitionHelper;
 
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
 @EventBusSubscriber(modid = Aphelion.MOD_ID)
 public final class PartitionSync {
 
-    // send once right after join (safe: delayed to next server tick)
-    private static final Set<UUID> PENDING_JOIN_SEND = new HashSet<>();
-
-    @SubscribeEvent
-    public static void onLogin(PlayerEvent.PlayerLoggedInEvent e) {
-        if (e.getEntity() instanceof ServerPlayer sp) {
-            PENDING_JOIN_SEND.add(sp.getUUID());
-        }
-    }
-
-    private static final java.util.Map<UUID, PartitionData> LAST_SENT = new java.util.HashMap<>();
+    // Stora all packets we send to all players in a map so we can look it up later
+    private static final java.util.Map<UUID, PartitionPayload> LAST_SENT = new java.util.HashMap<>();
 
     @SubscribeEvent
     public static void onServerTick(ServerTickEvent.Post e) {
@@ -39,24 +29,29 @@ public final class PartitionSync {
 //        Aphelion.LOGGER.info("WORKS!!!");
 
         for (ServerPlayer sp : server.getPlayerList().getPlayers()) {
-            PartitionData now = computePartitionFor(sp); // your logic
-            PartitionData prev = LAST_SENT.get(sp.getUUID());
 
+            // Prepare a new packet and compare it with the last one we sent the player
+            PartitionPayload now = computePartitionFor(sp);
+            PartitionPayload prev = LAST_SENT.get(sp.getUUID());
+
+            // If it is different, send them the new one
             if (prev == null || !prev.equals(now)) {
                 PacketDistributor.sendToPlayer(sp, now);
+                // Store this packet for later
                 LAST_SENT.put(sp.getUUID(), now);
             }
         }
     }
 
-    private static PartitionData computePartitionFor(ServerPlayer sp) {
-        // Example: convert player position to partition coords
+    private static PartitionPayload computePartitionFor(ServerPlayer sp) {
+        // convert player position to partition coords
         int px = (int)Math.floor(sp.getX() / SpacePartitionHelper.SIZE);
         int pz = (int)Math.floor(sp.getZ() / SpacePartitionHelper.SIZE);
 
+        // Get the orbit for the partition the player is in and create a packet for it
         var orbit = SpacePartitionSavedData.get(sp.serverLevel()).getOrbitForPartition(px, pz);
         String orbitId = (orbit != null) ? orbit.toString() : "aphelion:orbit/default";
 
-        return new PartitionData(orbitId);
+        return new PartitionPayload(orbitId);
     }
 }

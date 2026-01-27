@@ -35,5 +35,6 @@ public static final DeferredItem<Item> MUSIC_DISC_BIT_SHIFT = ITEMS.register("mu
     public static final DeferredItem<BlockItem> BLOCK_STEEL = ITEMS.register("block_steel", () -> new BlockItem(ModBlocks.BLOCK_STEEL.get(), BlockSteel.getItemProperties()));
     public static final DeferredItem<BlockItem> ARC_FURNACE_CASING_BLOCK = ITEMS.register("arc_furnace_casing", () -> new BlockItem(ModBlocks.ARC_FURNACE_CASING_BLOCK.get(), ArcFurnaceCasingBlock.getItemProperties()));
     public static final DeferredItem<BlockItem> VACUUM_ARC_FURNACE_CONTROLLER = ITEMS.register("vacuum_arc_furnace_controller", () -> new BlockItem(ModBlocks.VACUUM_ARC_FURNACE_CONTROLLER.get(), VacuumArcFurnaceController.getItemProperties()));
+    public static final DeferredItem<BlockItem> LAUNCH_PAD = ITEMS.register("launch_pad", () -> new BlockItem(ModBlocks.LAUNCH_PAD.get(), LaunchPad.getItemProperties()));
 //    public static final DeferredItem<BlockItem> VAF_MULTIBLOCK_DUMMY_BLOCK = ITEMS.register("vaf_multiblock_dummy_block", () -> new BlockItem(ModBlocks.VAF_MULTIBLOCK_DUMMY_BLOCK.get(), VAFMultiblockDummyBlock.getItemProperties()));
 }

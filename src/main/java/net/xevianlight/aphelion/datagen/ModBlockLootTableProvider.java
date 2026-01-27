@@ -24,6 +24,7 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         dropSelf(ModBlocks.ARC_FURNACE_CASING_BLOCK.get());
         dropSelf(ModBlocks.VACUUM_ARC_FURNACE_CONTROLLER.get());
         dropOther(ModBlocks.VAF_MULTIBLOCK_DUMMY_BLOCK.get(), ItemStack.EMPTY.getItem());
+        dropSelf(ModBlocks.LAUNCH_PAD.get());
     }
 
     @Override

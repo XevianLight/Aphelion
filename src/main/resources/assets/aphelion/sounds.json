@@ -6,5 +6,13 @@
         "stream": true
       }
     ]
+  },
+  "rocket_engine": {
+    "sounds": [
+      {
+        "name": "aphelion:rocket_engine",
+        "stream": true
+      }
+    ]
   }
 }

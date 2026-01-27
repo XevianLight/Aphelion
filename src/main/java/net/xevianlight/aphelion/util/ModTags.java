@@ -17,6 +17,8 @@ public class ModTags {
         public static final TagKey<Block> STORAGE_BLOCKS = commonTag("storage_blocks");
         public static final TagKey<Block> STORAGE_BLOCKS_STEEL = commonTag("storage_blocks/steel");
 
+        public static final TagKey<Block> LAUNCH_PAD = createTag("launch_pad");
+
         private static TagKey<Block> commonTag(String name) {
             return BlockTags.create(ResourceLocation.fromNamespaceAndPath("c", name));
         }
@@ -25,7 +27,6 @@ public class ModTags {
     public static class Items {
         public static final TagKey<Item> TEST_TAG = createTag("test_tag");
         public static final TagKey<Item> INGOTS = commonTag("ingots");
-
         public static final TagKey<Item> STORAGE_BLOCKS = commonTag("storage_blocks");
         public static final TagKey<Item> STORAGE_BLOCKS_STEEL = commonTag("storage_blocks/steel");
         public static final TagKey<Item> INGOT_ALUMINUM = commonTag("ingots/aluminum");
