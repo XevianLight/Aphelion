@@ -1,8 +1,9 @@
-// 1.21.1	2026-01-23T22:32:50.7204827	Loot Tables
+// 1.21.1	2026-01-28T08:47:15.3186366	Loot Tables
 69d8318ddba171526d1fabb87d9d93548ed8598e data/aphelion/loot_table/blocks/arc_furnace_casing.json
 05f08985e601d30116f67e2f07b48b03b40cdca6 data/aphelion/loot_table/blocks/block_steel.json
 ff43a9c3741faf10b1e156a7a74d5cfb035cc118 data/aphelion/loot_table/blocks/dimension_changer.json
 b63130d9c10485676303d729807b6fcaac080294 data/aphelion/loot_table/blocks/electric_arc_furnace.json
+afb6519a03415b8e0d5bafc9fadb70905a398046 data/aphelion/loot_table/blocks/oxygen_test_block.json
 1ab50c99e9f478840b9d003fd56ebdcab12fbbce data/aphelion/loot_table/blocks/test_block.json
 7d8eeb99a1bc942a6e2cf292b21fd4534062b5ab data/aphelion/loot_table/blocks/vacuum_arc_furnace_controller.json
 797bf9839d79e08b4832c9eaf3cb303b0471ed0c data/aphelion/loot_table/blocks/vaf_dummy_block.json

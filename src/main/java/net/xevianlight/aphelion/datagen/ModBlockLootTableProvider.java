@@ -23,6 +23,7 @@ public class ModBlockLootTableProvider extends BlockLootSubProvider {
         dropSelf(ModBlocks.ELECTRIC_ARC_FURNACE.get());
         dropSelf(ModBlocks.ARC_FURNACE_CASING_BLOCK.get());
         dropSelf(ModBlocks.VACUUM_ARC_FURNACE_CONTROLLER.get());
+        dropSelf(ModBlocks.OXYGEN_TEST_BLOCK.get());
         dropOther(ModBlocks.VAF_MULTIBLOCK_DUMMY_BLOCK.get(), ItemStack.EMPTY.getItem());
     }
 

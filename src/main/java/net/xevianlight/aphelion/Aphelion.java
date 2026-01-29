@@ -1,6 +1,5 @@
 package net.xevianlight.aphelion;
 
-import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -10,6 +9,7 @@ import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.xevianlight.aphelion.block.dummy.renderer.MultiblockDummyRenderer;
+import net.xevianlight.aphelion.block.entity.custom.renderer.OxygenTestRenderer;
 import net.xevianlight.aphelion.client.AphelionConfig;
 import net.xevianlight.aphelion.planet.AphelionPlanetJSONLoader;
 import net.xevianlight.aphelion.core.init.*;
@@ -132,6 +132,7 @@ public class Aphelion {
         @SubscribeEvent
         public static void registerBER(EntityRenderersEvent.RegisterRenderers event) {
             event.registerBlockEntityRenderer(ModBlockEntities.VAF_MULTIBLOCK_DUMMY_ENTITY.get(), MultiblockDummyRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.OXYGEN_TEST_BLOCK_ENTITY.get(), OxygenTestRenderer::new);
         }
 
         @SubscribeEvent

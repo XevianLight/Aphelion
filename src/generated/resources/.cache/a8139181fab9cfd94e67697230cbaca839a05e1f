@@ -1,15 +1,18 @@
-// 1.21.1	2026-01-18T19:51:57.3548439	Block States: aphelion
+// 1.21.1	2026-01-28T08:47:15.3176368	Block States: aphelion
 851ff42f7b21dec86107c8e0cefb3934ae4ebc08 assets/aphelion/blockstates/block_steel.json
 30b9c0efd7aaadb5412d98e4568f98b3632adbb9 assets/aphelion/blockstates/dimension_changer.json
 cb4287104006c80c8396b290ab5258df65d62cef assets/aphelion/blockstates/electric_arc_furnace.json
+28131a570d3666b7f323de4ad8a69e52ceec92e2 assets/aphelion/blockstates/oxygen_test_block.json
 b86c50fddcf6c8c6c19cb748529239d5962a3ede assets/aphelion/blockstates/test_block.json
 a810b97f4dace35d026f28d96cb9c47c93600d75 assets/aphelion/models/block/block_steel.json
 2d3592b7ab7132908709243e97540151e0fb762e assets/aphelion/models/block/dimension_changer.json
 5f7e8674070f31a63875b5d6147153bfa0eef61a assets/aphelion/models/block/electric_arc_furnace.json
+746f23f150a01524ad03cbd1eb822bfbb7cf453b assets/aphelion/models/block/oxygen_test_block.json
 e0971228b4a1c4bc9dbab58a7dacdc3ae6037e02 assets/aphelion/models/block/test_block.json
 cdc831b0f1c462be64825fd34bd446e5b95afac6 assets/aphelion/models/item/arc_furnace_casing.json
 3599f9037eb2f66de1765318b97ab564c3eae92f assets/aphelion/models/item/block_steel.json
 db0ec473a016ce05c258cde18a217d47a9ea8324 assets/aphelion/models/item/dimension_changer.json
 279080c06ada87f54fd0a7b885b256dbe25a946a assets/aphelion/models/item/electric_arc_furnace.json
+24cf60e70f7d9450b0e70cf017662e80971bae17 assets/aphelion/models/item/oxygen_test_block.json
 74418ef1cf678e72e7534924274688ef5a68af0e assets/aphelion/models/item/test_block.json
 88ca3602517e99f7feaed57eddfc96965a25761c assets/aphelion/models/item/vacuum_arc_furnace_controller.json

@@ -28,6 +28,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
         blockWithItem(ModBlocks.BLOCK_STEEL);
         blockWithItem(ModBlocks.DIMENSION_CHANGER);
         blockItem(ModBlocks.ARC_FURNACE_CASING_BLOCK);
+        blockWithItem(ModBlocks.OXYGEN_TEST_BLOCK);
     }
 
     private void blockWithItem(DeferredBlock<?> deferredBlock) {

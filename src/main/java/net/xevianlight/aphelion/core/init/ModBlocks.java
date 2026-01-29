@@ -1,6 +1,7 @@
 package net.xevianlight.aphelion.core.init;
 
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.xevianlight.aphelion.Aphelion;
@@ -17,4 +18,5 @@ public class ModBlocks {
     public static final  DeferredBlock<Block> ARC_FURNACE_CASING_BLOCK = BLOCKS.register("arc_furnace_casing", () -> new ArcFurnaceCasingBlock(ArcFurnaceCasingBlock.getProperties()));
     public static final  DeferredBlock<Block> VACUUM_ARC_FURNACE_CONTROLLER = BLOCKS.register("vacuum_arc_furnace_controller", () -> new VacuumArcFurnaceController(VacuumArcFurnaceController.getProperties()));
     public static final  DeferredBlock<Block> VAF_MULTIBLOCK_DUMMY_BLOCK = BLOCKS.register("vaf_dummy_block", () -> new VAFMultiblockDummyBlock(VAFMultiblockDummyBlock.getProperties()));
+    public static final DeferredBlock<Block> OXYGEN_TEST_BLOCK = BLOCKS.register("oxygen_test_block", () -> new OxygenTestBlock(OxygenTestBlock.getProperties()));
 }
