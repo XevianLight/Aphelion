@@ -42,6 +42,7 @@ public class OxygenTestRenderer implements BlockEntityRenderer<OxygenTestBlockEn
         // Renderers are relative to our block pos, so transform all points to be relative to block pos as well
         List<BlockPos> positionsToRender = toBlockPositions(be);
         BlockPos originPos = be.getBlockPos();
+        if (true) return;
 
         Set<BlockPos> relativePositions;
         if (relativePositionsCache != null) relativePositions = relativePositionsCache;
