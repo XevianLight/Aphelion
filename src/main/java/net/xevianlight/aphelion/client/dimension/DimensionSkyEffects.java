@@ -71,7 +71,7 @@ public class DimensionSkyEffects extends DimensionSpecialEffects {
 //        int py = PartitionClientState.pyOr(0);
         var data = ResourceLocation.parse(PartitionClientState.idOrUnknown());
 
-//        var data = SpacePartitionSavedData.get(serverLevel).getOrbitForPartition((int)   x, (int) z);
+//        var partitionData = SpacePartitionSavedData.get(serverLevel).getOrbitForPartition((int)   x, (int) z);
         if (data != null) return data;
 
         return ResourceLocation.fromNamespaceAndPath(Aphelion.MOD_ID, "orbit/default");

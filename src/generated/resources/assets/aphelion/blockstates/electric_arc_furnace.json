@@ -1,0 +1,64 @@
+{
+  "variants": {
+    "facing=east,formed=false,lit=false": {
+      "model": "aphelion:block/electric_arc_furnace",
+      "y": 90
+    },
+    "facing=east,formed=false,lit=true": {
+      "model": "aphelion:block/electric_arc_furnace",
+      "y": 90
+    },
+    "facing=east,formed=true,lit=false": {
+      "model": "aphelion:block/electric_arc_furnace",
+      "y": 90
+    },
+    "facing=east,formed=true,lit=true": {
+      "model": "aphelion:block/electric_arc_furnace",
+      "y": 90
+    },
+    "facing=north,formed=false,lit=false": {
+      "model": "aphelion:block/electric_arc_furnace"
+    },
+    "facing=north,formed=false,lit=true": {
+      "model": "aphelion:block/electric_arc_furnace"
+    },
+    "facing=north,formed=true,lit=false": {
+      "model": "aphelion:block/electric_arc_furnace"
+    },
+    "facing=north,formed=true,lit=true": {
+      "model": "aphelion:block/electric_arc_furnace"
+    },
+    "facing=south,formed=false,lit=false": {
+      "model": "aphelion:block/electric_arc_furnace",
+      "y": 180
+    },
+    "facing=south,formed=false,lit=true": {
+      "model": "aphelion:block/electric_arc_furnace",
+      "y": 180
+    },
+    "facing=south,formed=true,lit=false": {
+      "model": "aphelion:block/electric_arc_furnace",
+      "y": 180
+    },
+    "facing=south,formed=true,lit=true": {
+      "model": "aphelion:block/electric_arc_furnace",
+      "y": 180
+    },
+    "facing=west,formed=false,lit=false": {
+      "model": "aphelion:block/electric_arc_furnace",
+      "y": 270
+    },
+    "facing=west,formed=false,lit=true": {
+      "model": "aphelion:block/electric_arc_furnace",
+      "y": 270
+    },
+    "facing=west,formed=true,lit=false": {
+      "model": "aphelion:block/electric_arc_furnace",
+      "y": 270
+    },
+    "facing=west,formed=true,lit=true": {
+      "model": "aphelion:block/electric_arc_furnace",
+      "y": 270
+    }
+  }
+}

@@ -18,7 +18,9 @@ public final class PlanetCache {
     public static final Planet DEFAULT = new Planet(
             ResourceKey.create(Registries.DIMENSION, ResourceLocation.withDefaultNamespace("overworld")),
             1,
-            ResourceKey.create(ModRegistries.STAR_SYSTEM, Aphelion.id("sol"))
+            ResourceKey.create(ModRegistries.STAR_SYSTEM, Aphelion.id("sol")),
+            true,
+            1
     );
 
     public static void registerPlanets(Map<ResourceLocation, Planet> planets) {

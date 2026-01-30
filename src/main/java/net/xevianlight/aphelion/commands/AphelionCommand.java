@@ -15,17 +15,18 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ColumnPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.RelativeMovement;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.xevianlight.aphelion.Aphelion;
-import net.xevianlight.aphelion.core.space.SpacePartitionSavedData;
+import net.xevianlight.aphelion.core.saveddata.SpacePartitionSavedData;
 import net.xevianlight.aphelion.entites.vehicles.RocketEntity;
+import net.xevianlight.aphelion.planet.Planet;
 import net.xevianlight.aphelion.util.RocketStructure;
 import net.xevianlight.aphelion.util.SpacePartitionHelper;
+import net.xevianlight.aphelion.util.registries.ModRegistries;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.EnumSet;
@@ -241,6 +242,24 @@ public class AphelionCommand {
 
                                                     return 1;
                                                 })
+                                        )
+                                )
+                        )
+                        .then(Commands.literal("destination")
+                                .then(Commands.literal("set").then(
+                                        Commands.argument("pos", ColumnPosArgument.columnPos())
+                                            .then(Commands.argument("id", ResourceLocationArgument.id())
+                                                    .executes(context -> {
+                                                        int x = SpacePartitionHelper.get(ColumnPosArgument.getColumnPos(context, "pos").x());
+                                                        int z = SpacePartitionHelper.get(ColumnPosArgument.getColumnPos(context, "pos").z());
+                                                        ResourceLocation orbit = ResourceLocationArgument.getId(context, "id");
+
+                                                        ServerLevel level = context.getSource().getLevel();
+                                                        SpacePartitionSavedData.get(level).getData(x,z).setDestination(orbit);
+
+                                                        return 1;
+                                                    })
+                                            )
                                         )
                                 )
                         )

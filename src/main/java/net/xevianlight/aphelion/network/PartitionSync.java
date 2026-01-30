@@ -4,16 +4,14 @@ package net.xevianlight.aphelion.network;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.xevianlight.aphelion.Aphelion;
-import net.xevianlight.aphelion.core.space.SpacePartitionSavedData;
+import net.xevianlight.aphelion.core.saveddata.SpacePartitionSavedData;
+import net.xevianlight.aphelion.core.saveddata.types.PartitionData;
 import net.xevianlight.aphelion.network.packet.PartitionPayload;
 import net.xevianlight.aphelion.util.SpacePartitionHelper;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 @EventBusSubscriber(modid = Aphelion.MOD_ID)
@@ -44,14 +42,14 @@ public final class PartitionSync {
     }
 
     private static PartitionPayload computePartitionFor(ServerPlayer sp) {
-        // convert player position to partition coords
         int px = (int)Math.floor(sp.getX() / SpacePartitionHelper.SIZE);
         int pz = (int)Math.floor(sp.getZ() / SpacePartitionHelper.SIZE);
 
-        // Get the orbit for the partition the player is in and create a packet for it
-        var orbit = SpacePartitionSavedData.get(sp.serverLevel()).getOrbitForPartition(px, pz);
-        String orbitId = (orbit != null) ? orbit.toString() : "aphelion:orbit/default";
+        PartitionData live = SpacePartitionSavedData.get(sp.serverLevel()).getData(px, pz);
 
-        return new PartitionPayload(orbitId);
+        // snapshot so mutations later don’t affect cached payloads
+        PartitionData snapshot = (live == null) ? null : new PartitionData(live);
+
+        return new PartitionPayload(snapshot);
     }
 }

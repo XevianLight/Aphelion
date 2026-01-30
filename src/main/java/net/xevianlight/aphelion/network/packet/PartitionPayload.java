@@ -1,24 +1,39 @@
 package net.xevianlight.aphelion.network.packet;
 
 import io.netty.buffer.ByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.xevianlight.aphelion.Aphelion;
+import net.xevianlight.aphelion.core.saveddata.types.PartitionData;
 
-public record PartitionPayload(String id) implements CustomPacketPayload {
-    public static final Type<PartitionPayload> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(Aphelion.MOD_ID, "partition_data"));
+import java.util.Objects;
 
-    public static final StreamCodec<ByteBuf, PartitionPayload> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.STRING_UTF8,
-            PartitionPayload::id,
+public record PartitionPayload(PartitionData partitionData) implements CustomPacketPayload {
+    public static final Type<PartitionPayload> TYPE =
+            new Type<>(ResourceLocation.fromNamespaceAndPath(Aphelion.MOD_ID, "partition_data"));
 
-            PartitionPayload::new
-    );
+    public static final StreamCodec<ByteBuf, PartitionPayload> STREAM_CODEC =
+            StreamCodec.composite(
+                    PartitionData.STREAM_CODEC,
+                    PartitionPayload::partitionData,
+                    PartitionPayload::new
+            );
 
     @Override
     public Type<? extends CustomPacketPayload> type() {
         return TYPE;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        PartitionPayload that = (PartitionPayload) o;
+        return partitionData.equals(that.partitionData);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(partitionData);
     }
 }

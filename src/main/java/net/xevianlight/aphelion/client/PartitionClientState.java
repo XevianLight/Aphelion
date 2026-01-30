@@ -1,5 +1,6 @@
 package net.xevianlight.aphelion.client;
 
+import net.xevianlight.aphelion.core.saveddata.types.PartitionData;
 import net.xevianlight.aphelion.network.packet.PartitionPayload;
 
 import java.util.Optional;
@@ -14,7 +15,15 @@ public final class PartitionClientState {
     }
 
     public static String idOrUnknown() {
-        return last != null ? last.id() : "unknown";
+        String orbit = String.valueOf(last.partitionData().getOrbit());
+        if (orbit == null) {
+            return "aphleion:orbit/default";
+        }
+        return last != null ? orbit : "unknown";
+    }
+
+    public static PartitionData lastData() {
+        return last.partitionData();
     }
 //
 //    public static int pxOr(int fallback) {

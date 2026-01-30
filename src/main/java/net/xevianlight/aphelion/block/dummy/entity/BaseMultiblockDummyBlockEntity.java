@@ -142,7 +142,7 @@ public class BaseMultiblockDummyBlockEntity extends BlockEntity implements IMult
         // Force rerender on client
         if (level != null) {
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
-            requestModelDataUpdate(); // if you rely on model data
+            requestModelDataUpdate(); // if you rely on model partitionData
         }
     }
 
@@ -179,7 +179,7 @@ public class BaseMultiblockDummyBlockEntity extends BlockEntity implements IMult
         setChanged();
         if (level != null) {
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
-            requestModelDataUpdate(); // only if you use model data
+            requestModelDataUpdate(); // only if you use model partitionData
         }
     }
 }

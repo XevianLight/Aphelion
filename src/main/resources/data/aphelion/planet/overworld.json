@@ -1,5 +1,7 @@
 {
   "dimension": "minecraft:overworld",
   "orbit_distance": 1,
-  "star_system": "aphelon:sol"
+  "star_system": "aphelon:sol",
+  "gravity": 1,
+  "oxygen": true
 }

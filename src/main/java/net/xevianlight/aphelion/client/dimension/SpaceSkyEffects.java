@@ -5,12 +5,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.DimensionSpecialEffects;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.Vec3;
 import net.xevianlight.aphelion.Aphelion;
 import net.xevianlight.aphelion.client.PartitionClientState;
-import net.xevianlight.aphelion.core.space.SpacePartitionSavedData;
 import net.xevianlight.aphelion.util.SpacePartitionHelper;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
@@ -29,7 +26,7 @@ public class SpaceSkyEffects extends DimensionSpecialEffects {
             return ResourceLocation.withDefaultNamespace("overworld");
         }
         if (effectsId.equals(Aphelion.id("space"))) {
-            return SpaceSkyEffects.orbitForPos(camera.getPosition()); // or inline this logic
+            return orbitForPos(camera.getPosition()); // or inline this logic
         }
         return effectsId;
     }
@@ -80,7 +77,7 @@ public class SpaceSkyEffects extends DimensionSpecialEffects {
 //        int py = PartitionClientState.pyOr(0);
         var data = ResourceLocation.parse(PartitionClientState.idOrUnknown());
 
-//        var data = SpacePartitionSavedData.get(serverLevel).getOrbitForPartition((int)   x, (int) z);
+//        var partitionData = SpacePartitionSavedData.get(serverLevel).getOrbitForPartition((int)   x, (int) z);
         if (data != null) return data;
 
         return ResourceLocation.fromNamespaceAndPath(Aphelion.MOD_ID, "orbit/default");

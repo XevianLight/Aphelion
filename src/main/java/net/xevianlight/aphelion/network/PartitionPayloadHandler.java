@@ -11,6 +11,6 @@ public class PartitionPayloadHandler {
     public static void handleDataOnMain(PartitionPayload data, IPayloadContext context) {
         // Set our local partition state to the packet we just received.
         PartitionClientState.set(data);
-        Aphelion.LOGGER.info("Partition packet received! id={}", data.id());
+        Aphelion.LOGGER.info("Partition packet received! id={}", data.partitionData());
     }
 }
