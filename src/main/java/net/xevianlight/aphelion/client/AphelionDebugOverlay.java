@@ -2,6 +2,8 @@ package net.xevianlight.aphelion.client;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -11,6 +13,7 @@ import net.xevianlight.aphelion.Aphelion;
 import net.xevianlight.aphelion.client.dimension.DimensionRenderer;
 import net.xevianlight.aphelion.client.dimension.DimensionRendererCache;
 import net.xevianlight.aphelion.client.dimension.SpaceSkyEffects;
+import net.xevianlight.aphelion.core.saveddata.EnvironmentSavedData;
 import net.xevianlight.aphelion.core.saveddata.SpacePartitionSavedData;
 import net.xevianlight.aphelion.util.SpacePartitionHelper;
 
@@ -51,5 +54,12 @@ public class AphelionDebugOverlay {
 //        event.getLeft().add(" Sky: " + rendererSummary);
         event.getLeft().add(" Station: " +  x + " " + z + "   ID: " + SpacePartitionSavedData.pack(x,z));
         event.getLeft().add(" Station Destination:" + PartitionClientState.lastData().getDestination());
+        var server = mc.getSingleplayerServer();
+        ServerLevel singlePlayerLevel;
+        if (server != null) {
+            singlePlayerLevel = server.getLevel(mc.level.dimension());
+            if (singlePlayerLevel != null)
+                event.getLeft().add(" Oxygen: " + EnvironmentSavedData.get(singlePlayerLevel).hasOxygen(singlePlayerLevel, mc.player.blockPosition()));
+        }
     }
 }

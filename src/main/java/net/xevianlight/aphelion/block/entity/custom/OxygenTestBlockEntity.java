@@ -1,18 +1,17 @@
 package net.xevianlight.aphelion.block.entity.custom;
 
-import it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.core.SectionPos;
-import net.minecraft.core.Vec3i;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import static net.xevianlight.aphelion.Aphelion.LOGGER;
 
-import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.xevianlight.aphelion.core.init.ModBlockEntities;
+import net.xevianlight.aphelion.core.saveddata.EnvironmentSavedData;
+import net.xevianlight.aphelion.util.FloodFill3D;
 import org.openjdk.nashorn.internal.runtime.regexp.joni.exception.ValueException;
 
 import java.util.*;
@@ -43,9 +42,23 @@ public class OxygenTestBlockEntity extends BlockEntity {
         return level != null && fastBlockState(pos).isAir();
     }
 
-    public static final int MAX_RANGE = 100;
+    public static final int MAX_RANGE = 16;
     public boolean isInRange(BlockPos pos1, BlockPos pos2) {
         return Math.abs(pos1.getX() - pos2.getX()) + Math.abs(pos1.getY() - pos2.getY()) + Math.abs(pos1.getZ() - pos2.getZ()) <= MAX_RANGE;
+    }
+
+    public void removeEnclosed() {
+        if (enclosedCache != null) {
+            var singleplayerServer = Minecraft.getInstance().getSingleplayerServer();
+            if (singleplayerServer != null) {
+                var serverLevel = singleplayerServer.getLevel(level.dimension());
+                if (serverLevel != null) {
+                    var savedData = EnvironmentSavedData.get(serverLevel);
+                    savedData.resetOxygen(serverLevel, enclosedCache);
+                    enclosedCache = Set.of();
+                }
+            }
+        }
     }
 
     /// 256*256*256 grid of booleans
@@ -94,7 +107,7 @@ public class OxygenTestBlockEntity extends BlockEntity {
             // wrapping order is X->Z->Y, so we go along the X axis,
             // wrap to the Z axis to make a square, and once the square is full
             // we step up once along the Y axis.
-            int bitPos = inX & 7; // bottom 4 bits of X is bit pos
+            int bitPos = inX & 15; // bottom 4 bits of X is bit pos
             int bit = (1 << bitPos);
 
             // First (bitsSize-4) bits are for X, next (bitsSize) bits are for Z, next (bitsSize) bits are for Y
@@ -106,22 +119,29 @@ public class OxygenTestBlockEntity extends BlockEntity {
         }
     }
 
-    private List<BlockPos> enclosedCache;
-    public List<BlockPos> getEnclosedBlocks() {
-        if (level == null) return List.of();
-        if (enclosedCache != null) return enclosedCache;
+    private Set<BlockPos> enclosedCache;
+
+
+    public Set<BlockPos> getEnclosedCache() {
+        return enclosedCache;
+    }
+
+    public Set<BlockPos> getEnclosedBlocks() {
+        if (level == null) return Set.of();
+//        if (enclosedCache != null) return enclosedCache;
 
         long start = System.nanoTime();
-        List<BlockPos> enclosedBlocks = new ArrayList<>();
-        // make this bitch BIIIIIG
-        BigBoolGrid seen = new BigBoolGrid(8, this.getBlockPos().getX(), this.getBlockPos().getY(), this.getBlockPos().getZ());
+        Set<BlockPos> enclosedBlocks = FloodFill3D.run(level, getBlockPos(), 6000, FloodFill3D.TEST_FULL_SEAL, true);
 
-        // It's... a reasonable assumption that we won't have to include more blocks at once than the area of a sphere?
-        // maybe a bit more, IDK how exactly it scales to blocks.
-        Stack<BlockPos> stack = new Stack<>();
-        Stack<Integer> radiusStack = new Stack<>();
-
-        stack.add(this.getBlockPos());
+//        // make this bitch BIIIIIG
+//        BigBoolGrid seen = new BigBoolGrid(8, this.getBlockPos().getX(), this.getBlockPos().getY(), this.getBlockPos().getZ());
+//
+//        // It's... a reasonable assumption that we won't have to include more blocks at once than the area of a sphere?
+//        // maybe a bit more, IDK how exactly it scales to blocks.
+//        Stack<BlockPos> stack = new Stack<>();
+//        Stack<Integer> radiusStack = new Stack<>();
+//
+//        stack.add(this.getBlockPos());
 
         // Do flood fill out from this block
         // Push on the top of the stack (newest), pop from the bottom of the stack (oldest).
@@ -130,21 +150,48 @@ public class OxygenTestBlockEntity extends BlockEntity {
         // and you'd see that every pos of layer 1 is together, then layer 2, then layer 3...
 
 
-        BlockPos ourPos = getBlockPos();
-        while (!stack.isEmpty()) {
-            BlockPos spreadFromPos = stack.pop();
-            for (Direction d : Direction.values()) {
-                BlockPos relativePos = spreadFromPos.relative(d);
+//        BlockPos ourPos = getBlockPos();
+//        while (!stack.isEmpty()) {
+//            BlockPos spreadFromPos = stack.pop();
+//            for (Direction d : Direction.values()) {
+//                BlockPos relativePos = spreadFromPos.relative(d);
+//
+//                if (isInRange(relativePos, ourPos) && canSpreadTo(relativePos)) {
+//                    // seen.add runs seen.contains under the hood,
+//                    // + this is the most expensive operation.
+//                    // should save a lot of time!
+//                    if (seen.add(relativePos.getX(), relativePos.getY(), relativePos.getZ())) {
+//                        enclosedBlocks.add(relativePos);
+//                        stack.add(relativePos);
+//                    }
+//                }
+//            }
+//        }
 
-                if (isInRange(relativePos, ourPos) && canSpreadTo(relativePos)) {
-                    // seen.add runs seen.contains under the hood,
-                    // + this is the most expensive operation.
-                    // should save a lot of time!
-                    if (seen.add(relativePos.getX(), relativePos.getY(), relativePos.getZ())) {
-                        enclosedBlocks.add(relativePos);
-                        stack.add(relativePos);
+        var singleplayerServer = Minecraft.getInstance().getSingleplayerServer();
+        if (singleplayerServer != null) {
+            var serverLevel = singleplayerServer.getLevel(level.dimension());
+            if (serverLevel != null) {
+
+                // Build a set of longs for the newly computed blocks (order-independent)
+                boolean changed = isChanged(enclosedBlocks);
+//                boolean changed = false;
+                if (changed) {
+                    var savedData = EnvironmentSavedData.get(serverLevel);
+
+                    // Revert old affected area back to defaults
+                    if (enclosedCache != null) {
+                        savedData.resetOxygen(serverLevel, enclosedCache);
                     }
+
+                    // Apply oxygen to new affected area
+                    savedData.setOxygen(serverLevel, enclosedBlocks, true);
+
+                    LOGGER.info("Saved data for {} blocks to leveldata", enclosedBlocks.size());
                 }
+
+                // Update the cache no matter what (so next compare is correct)
+                enclosedCache = enclosedBlocks;
             }
         }
         long durationNanos = System.nanoTime() - start;
@@ -152,12 +199,49 @@ public class OxygenTestBlockEntity extends BlockEntity {
         LOGGER.info("Flood fill completed in {}µs, {} blocks at {}µs/block", durationMicros, enclosedBlocks.size(), durationMicros / enclosedBlocks.size());
 
         enclosedCache = enclosedBlocks;
-        return enclosedBlocks;
+
+        return enclosedCache;
+    }
+
+    private boolean isChanged(Set<BlockPos> enclosedBlocks) {
+        LongOpenHashSet newSet = new LongOpenHashSet(enclosedBlocks.size());
+        for (BlockPos p : enclosedBlocks) {
+            newSet.add(p.asLong());
+        }
+
+        // Build a set of longs for the cached blocks (if any)
+        LongOpenHashSet oldSet = null;
+        if (enclosedCache != null) {
+            oldSet = new LongOpenHashSet(enclosedCache.size());
+            for (BlockPos p : enclosedCache) {
+                oldSet.add(p.asLong());
+            }
+        }
+
+        // Only save if the set of affected blocks has changed
+        boolean changed = (oldSet == null) || !oldSet.equals(newSet);
+        return changed;
     }
 
     private void helper() {
         var myVar = new BlockPos(1, 1, 1).hashCode();
     }
 
+    int ticks = 0;
+    int refreshAfter = 20;
+
+
+
+    public void tick(Level level, BlockPos pos, BlockState blockState) {
+        if (level.isClientSide) return;
+        ticks++;
+        if (ticks >= refreshAfter) {
+            getEnclosedBlocks();
+            ticks = 0;
+
+            // UNCOMMENT FOR DEBUG ONLY!!! EXTREMELY TPS INTENSIVE!!!
+//            EnvironmentSavedData.refreshFromIntegratedServerIfNeeded(Minecraft.getInstance(), 64, 10000);
+        }
+    }
 
 }

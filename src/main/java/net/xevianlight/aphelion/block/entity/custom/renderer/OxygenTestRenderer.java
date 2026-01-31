@@ -12,6 +12,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.phys.AABB;
+import net.xevianlight.aphelion.Aphelion;
 import net.xevianlight.aphelion.block.entity.custom.OxygenTestBlockEntity;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -23,13 +24,18 @@ public class OxygenTestRenderer implements BlockEntityRenderer<OxygenTestBlockEn
     public OxygenTestRenderer (BlockEntityRendererProvider.Context context) {}
 
     private List<BlockPos> toBlockPositions(OxygenTestBlockEntity be) {
-        return be.getEnclosedBlocks();
+//        cache = be.getEnclosedBlocks();
+//        if (cache != null)
+//            return cache;
+        return List.of();
     }
 
     @Override
     public AABB getRenderBoundingBox(OxygenTestBlockEntity blockEntity) {
         return AABB.ofSize(blockEntity.getBlockPos().getCenter(), OxygenTestBlockEntity.MAX_RANGE*2, OxygenTestBlockEntity.MAX_RANGE*2, OxygenTestBlockEntity.MAX_RANGE*2);
     }
+
+    List<BlockPos> cache;
 
     private Set<BlockPos> relativePositionsCache;
     @Override
@@ -42,7 +48,7 @@ public class OxygenTestRenderer implements BlockEntityRenderer<OxygenTestBlockEn
         // Renderers are relative to our block pos, so transform all points to be relative to block pos as well
         List<BlockPos> positionsToRender = toBlockPositions(be);
         BlockPos originPos = be.getBlockPos();
-        if (true) return;
+//        if (true) return;
 
         Set<BlockPos> relativePositions;
         if (relativePositionsCache != null) relativePositions = relativePositionsCache;

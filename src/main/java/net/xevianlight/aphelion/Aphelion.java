@@ -1,16 +1,23 @@
 package net.xevianlight.aphelion;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 import net.xevianlight.aphelion.block.dummy.renderer.MultiblockDummyRenderer;
 import net.xevianlight.aphelion.block.entity.custom.renderer.OxygenTestRenderer;
 import net.xevianlight.aphelion.client.AphelionConfig;
+import net.xevianlight.aphelion.core.saveddata.EnvironmentSavedData;
+import net.xevianlight.aphelion.network.packet.PartitionPayload;
 import net.xevianlight.aphelion.planet.AphelionPlanetJSONLoader;
 import net.xevianlight.aphelion.core.init.*;
 import net.xevianlight.aphelion.fluid.BaseFluidType;
@@ -132,7 +139,7 @@ public class Aphelion {
         @SubscribeEvent
         public static void registerBER(EntityRenderersEvent.RegisterRenderers event) {
             event.registerBlockEntityRenderer(ModBlockEntities.VAF_MULTIBLOCK_DUMMY_ENTITY.get(), MultiblockDummyRenderer::new);
-            event.registerBlockEntityRenderer(ModBlockEntities.OXYGEN_TEST_BLOCK_ENTITY.get(), OxygenTestRenderer::new);
+//            event.registerBlockEntityRenderer(ModBlockEntities.OXYGEN_TEST_BLOCK_ENTITY.get(), OxygenTestRenderer::new);
         }
 
         @SubscribeEvent
@@ -145,6 +152,11 @@ public class Aphelion {
         @SubscribeEvent
         public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
             event.registerEntityRenderer(ModEntities.ROCKET.get(), RocketRenderer::new);
+        }
+
+        @SubscribeEvent
+        public static void onClientTick(ClientTickEvent.Post e) {
+            EnvironmentSavedData.refreshFromIntegratedServerIfNeeded(Minecraft.getInstance(), 64, 10000);
         }
     }
 }

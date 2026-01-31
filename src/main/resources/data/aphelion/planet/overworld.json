@@ -3,5 +3,5 @@
   "orbit_distance": 1,
   "star_system": "aphelon:sol",
   "gravity": 1,
-  "oxygen": true
+  "oxygen": false
 }
