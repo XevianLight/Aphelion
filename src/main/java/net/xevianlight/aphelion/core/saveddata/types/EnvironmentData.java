@@ -1,6 +1,6 @@
 package net.xevianlight.aphelion.core.saveddata.types;
 
-public final class EnvironmentData {
+public record EnvironmentData (boolean oxygen, short temperature, float gravity){
 
 
 
@@ -26,14 +26,24 @@ public final class EnvironmentData {
     private static final int TEMPERATURE_BIT = OXYGEN_BIT + OXYGEN_BITS; // next 16 bits
     private static final int GRAVITY_BIT = TEMPERATURE_BIT + TEMPERATURE_BITS; // next 15 bits
 
-    private boolean oxygen;
-    private short temperature;
-    private float gravity;
 
     public EnvironmentData(boolean oxygen, short temperature, float gravity) {
         this.oxygen = oxygen;
         this.temperature = temperature;
         this.gravity = gravity;
+    }
+
+    public EnvironmentData withOxygen(boolean newOxygen) {
+        return new EnvironmentData(newOxygen, this.temperature, this.gravity);
+    }
+
+    public EnvironmentData withTemperature(short newTemperature) {
+        return new EnvironmentData(this.oxygen, newTemperature, this.gravity);
+    }
+
+    @Deprecated
+    public EnvironmentData withGravity(float newGravity) {
+        return new EnvironmentData(this.oxygen, this.temperature, newGravity);
     }
 
     public int pack() {
@@ -76,23 +86,12 @@ public final class EnvironmentData {
         return oxygen;
     }
 
-    public void setOxygen(boolean oxygen) {
-        this.oxygen = oxygen;
-    }
-
     public short getTemperature() {
         return temperature;
-    }
-
-    public void setTemperature(short temperature) {
-        this.temperature = temperature;
     }
 
     public float getGravity() {
         return gravity;
     }
 
-    public void setGravity(float gravity) {
-        this.gravity = gravity;
-    }
 }

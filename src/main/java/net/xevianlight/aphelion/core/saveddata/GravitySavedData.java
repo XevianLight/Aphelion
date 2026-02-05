@@ -1,8 +1,6 @@
 package net.xevianlight.aphelion.core.saveddata;
 
 import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
-import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -10,8 +8,6 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.xevianlight.aphelion.client.ClientOxygenCache;
-import net.xevianlight.aphelion.core.saveddata.types.EnvironmentData;
 import net.xevianlight.aphelion.core.saveddata.types.GravityData;
 import net.xevianlight.aphelion.planet.Planet;
 import net.xevianlight.aphelion.planet.PlanetCache;
@@ -19,7 +15,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -105,7 +100,7 @@ public class GravitySavedData extends SavedData {
         List<GravityData> regions = getGravityRegions(pos);
 
         for (var e : regions) {
-            sum += e.getAccel();
+            sum += e.getGravity();
         }
 
         return sum;
@@ -120,7 +115,7 @@ public class GravitySavedData extends SavedData {
         List<GravityData> regions = getGravityRegions(pos);
 
         for (var e : regions) {
-            var accel = e.getAccel();
+            var accel = e.getGravity();
             if (accel > max) max = accel;
         }
 

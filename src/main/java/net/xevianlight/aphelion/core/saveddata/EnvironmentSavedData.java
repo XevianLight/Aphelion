@@ -103,9 +103,8 @@ public class EnvironmentSavedData extends SavedData {
 
     public void setOxygen(Level level, BlockPos pos, boolean value) {
         var data = getDataForPosition(level, pos);
-        data.setOxygen(value);
 //        Aphelion.LOGGER.info("Set oxygen for {} to {}", pos, value);
-        putOrRemove(level, pos.asLong(), data.pack());
+        putOrRemove(level, pos.asLong(), data.withOxygen(value).pack());
     }
 
     public void setOxygen(Level level, Collection<BlockPos> positions, boolean value) {
@@ -116,8 +115,7 @@ public class EnvironmentSavedData extends SavedData {
 
     public void resetOxygen(Level level, BlockPos pos) {
         var data = getDataForPosition(level, pos);
-        data.setOxygen(defaultData(level).hasOxygen());
-        putOrRemove(level, pos.asLong(), data.pack());
+        putOrRemove(level, pos.asLong(), data.withOxygen(defaultData(level).hasOxygen()).pack());
     }
 
     public void resetOxygen(Level level, Collection<BlockPos> positions) {
@@ -133,8 +131,7 @@ public class EnvironmentSavedData extends SavedData {
 
     public void setGravity(Level level, BlockPos pos, float value) {
         var data = getDataForPosition(level, pos);
-        data.setGravity(value);
-        putOrRemove(level, pos.asLong(), data.pack());
+        putOrRemove(level, pos.asLong(), data.withGravity(value).pack());
     }
 
     public void setGravity(Level level, Collection<BlockPos> positions, float value) {
@@ -145,8 +142,7 @@ public class EnvironmentSavedData extends SavedData {
 
     public void resetGravity(Level level, BlockPos pos) {
         var data = getDataForPosition(level, pos);
-        data.setGravity(defaultData(level).getGravity());
-        putOrRemove(level, pos.asLong(), data.pack());
+        putOrRemove(level, pos.asLong(), data.withGravity(defaultData(level).getGravity()).pack());
     }
 
     public short getTemperature(Level level, BlockPos pos) {
@@ -156,8 +152,7 @@ public class EnvironmentSavedData extends SavedData {
 
     public void setTemperature(Level level, BlockPos pos, short value) {
         var data = getDataForPosition(level, pos);
-        data.setTemperature(value);
-        putOrRemove(level, pos.asLong(), data.pack());
+        putOrRemove(level, pos.asLong(), data.withTemperature(value).pack());
     }
 
     public void setTemperature(Level level, Collection<BlockPos> positions, short value) {
@@ -168,8 +163,7 @@ public class EnvironmentSavedData extends SavedData {
 
     public void resetTemperature(Level level, BlockPos pos) {
         var data = getDataForPosition(level, pos);
-        data.setTemperature(defaultData(level).getTemperature());
-        putOrRemove(level, pos.asLong(), data.pack());
+        putOrRemove(level, pos.asLong(), data.withTemperature((defaultData(level).getTemperature())).pack());
     }
 
     private void putOrRemove(Level level, long key, int packed) {
