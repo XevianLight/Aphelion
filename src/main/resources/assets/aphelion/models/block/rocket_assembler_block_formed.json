@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "minecraft:block/furnace_front",
+    "side": "aphelion:block/arc_furnace_casing_formed",
+    "top": "aphelion:block/arc_furnace_casing_formed"
+  }
+}

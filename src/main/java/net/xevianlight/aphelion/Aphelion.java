@@ -15,6 +15,7 @@ import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.xevianlight.aphelion.block.dummy.renderer.MultiblockDummyRenderer;
 import net.xevianlight.aphelion.block.entity.custom.renderer.OxygenTestRenderer;
+import net.xevianlight.aphelion.block.entity.custom.renderer.RocketAssemblerBlockEntityRenderer;
 import net.xevianlight.aphelion.client.AphelionConfig;
 import net.xevianlight.aphelion.core.saveddata.EnvironmentSavedData;
 import net.xevianlight.aphelion.network.packet.PartitionPayload;
@@ -139,6 +140,7 @@ public class Aphelion {
         @SubscribeEvent
         public static void registerBER(EntityRenderersEvent.RegisterRenderers event) {
             event.registerBlockEntityRenderer(ModBlockEntities.VAF_MULTIBLOCK_DUMMY_ENTITY.get(), MultiblockDummyRenderer::new);
+            event.registerBlockEntityRenderer(ModBlockEntities.ROCKET_ASSEMBLER_BLOCK_ENTITY.get(), RocketAssemblerBlockEntityRenderer::new);
 //            event.registerBlockEntityRenderer(ModBlockEntities.OXYGEN_TEST_BLOCK_ENTITY.get(), OxygenTestRenderer::new);
         }
 
