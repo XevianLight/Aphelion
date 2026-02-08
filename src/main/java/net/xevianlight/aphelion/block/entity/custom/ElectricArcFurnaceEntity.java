@@ -42,7 +42,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class ElectricArcFurnaceEntity extends BlockEntity implements MenuProvider, TickableBlockEntity {
+public class ElectricArcFurnaceEntity extends BlockEntity implements MenuProvider, TickableBlockEntity, IArcFurnaceLike {
 
     private final int SIZE = 4;
     private int ENERGY_CAPACITY = 64000;
@@ -309,6 +309,11 @@ public class ElectricArcFurnaceEntity extends BlockEntity implements MenuProvide
         level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), 3);
     }
 
+    @Override
+    public IEnergyStorage getTrueEnergyStorage() {
+        return ENERGY_STORAGE;
+    }
+
     private final IItemHandler fullHandler = new SidedSlotHandler(inventory, new int[]{INPUT_SLOT, SECONDARY_INPUT_SLOT, OUTPUT_SLOT, ENERGY_SLOT}, true, true);
     private final IItemHandler emptyJeiHandler = new SidedSlotHandler(inventory, new int[]{}, false, false);
     private final IItemHandler inputHandler = new SidedSlotHandler(inventory, new int[]{0,1}, true, true);
@@ -342,6 +347,11 @@ public class ElectricArcFurnaceEntity extends BlockEntity implements MenuProvide
 
     public ItemStackHandler getInventory() {
         return inventory;
+    }
+
+    @Override
+    public ModEnergyStorage getEnergy() {
+        return ENERGY_STORAGE;
     }
 
     public void drops() {

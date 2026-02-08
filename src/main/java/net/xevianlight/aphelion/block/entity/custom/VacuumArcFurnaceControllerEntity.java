@@ -47,7 +47,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
-public class VacuumArcFurnaceControllerEntity extends BlockEntity implements MenuProvider, IMultiblockController, TickableBlockEntity {
+public class VacuumArcFurnaceControllerEntity extends BlockEntity implements MenuProvider, IMultiblockController, TickableBlockEntity, IArcFurnaceLike {
 
     private final int SIZE = 4;
     private final int ENERGY_CAPACITY = 64000;
@@ -357,7 +357,8 @@ public class VacuumArcFurnaceControllerEntity extends BlockEntity implements Men
         return isFormed() ? ENERGY_STORAGE : null;
     }
 
-    public IEnergyStorage getTrueEnergyStorage(@Nullable Direction direction) {
+    @Override
+    public IEnergyStorage getTrueEnergyStorage() {
         return this.ENERGY_STORAGE;
     }
 

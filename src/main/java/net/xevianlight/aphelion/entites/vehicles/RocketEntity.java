@@ -506,4 +506,54 @@ public class RocketEntity extends VehicleEntity implements IEntityWithComplexSpa
         return InteractionResult.sidedSuccess(level().isClientSide);
     }
 
+    public boolean disassemble() {
+        if (level().isClientSide) return false;
+        if (!(level() instanceof ServerLevel server)) return false;
+
+        // Optional: only allow when not in flight
+        if (getPhase() == FlightPhase.ASCEND || getPhase() == FlightPhase.TRANSIT || getPhase() == FlightPhase.DESCEND) {
+            return false;
+        }
+
+        // Kick riders off first (so we don't place blocks inside them)
+        ejectPassengers();
+
+        // Anchor: blocks were captured relative to the scan origin.
+        // Your rocket is spawned at seatPos + (0.5, 0, 0.5), so we convert back to the block origin.
+        BlockPos origin = BlockPos.containing(getX(), getY(), getZ());
+
+        // Place blocks
+        for (int i = 0; i < structure.size(); i++) {
+            int packed = structure.packedPosAt(i);
+
+            int dx = RocketStructure.unpackX(packed);
+            int dy = RocketStructure.unpackY(packed);
+            int dz = RocketStructure.unpackZ(packed);
+
+            BlockPos wp = origin.offset(dx, dy, dz);
+            var stateToPlace = structure.stateAt(i);
+
+            // Don't place air (shouldn't exist in structure anyway, but safe)
+            if (stateToPlace.isAir()) continue;
+
+            // Safety: don't overwrite existing blocks
+            if (!server.getBlockState(wp).isAir()) {
+                // If you want strict behavior, abort entirely:
+                // return false;
+
+                // Otherwise just skip conflicts:
+                continue;
+            }
+
+            // Extra safety: avoid accidentally placing into portal/void/etc if desired
+            // if (!server.isInWorldBounds(wp)) continue;
+
+            server.setBlock(wp, stateToPlace, 3);
+        }
+
+        // Remove the rocket entity
+        discard(); // preferred over kill() for "just remove this entity"
+        return true;
+    }
+
 }

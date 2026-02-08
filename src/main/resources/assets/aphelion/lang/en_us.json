@@ -52,5 +52,7 @@
   "command.aphelion.rocket.get_dim.success": "Target dimension of rocket is %s",
   "command.aphelion.rocket.set_pos.success": "Set target position of rocket to %s",
   "command.aphelion.rocket.get_pos.success": "Target position of rocket is %s",
-  "command.aphelion.rocket.get_pos.success.null": "Target position of rocket is not set"
+  "command.aphelion.rocket.get_pos.success.null": "Target position of rocket is not set",
+  "command.aphelion.rocket.disassemble.success": "Rocket disassembled",
+  "command.aphelion.rocket.disassemble.failure": "Could not disassemble rocket"
 }

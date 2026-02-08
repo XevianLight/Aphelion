@@ -5,8 +5,11 @@ import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.*;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.phys.AABB;
 
 import java.util.ArrayList;
@@ -170,15 +173,54 @@ public final class RocketStructure {
     }
 
     public static void clearCaptured(Level level, BlockPos origin, RocketStructure struct) {
+        final int flags = Block.UPDATE_CLIENTS;
+
+        // Pass 1: remove blocks which implement DOUBLE_BLOCK_HALF like doors to try and prevent duplication.
         for (int i = 0; i < struct.size(); i++) {
             int packed = struct.packedPosAt(i);
-            int dx = RocketStructure.unpackX(packed);
-            int dy = RocketStructure.unpackY(packed);
-            int dz = RocketStructure.unpackZ(packed);
+            BlockPos wp = origin.offset(
+                    RocketStructure.unpackX(packed),
+                    RocketStructure.unpackY(packed),
+                    RocketStructure.unpackZ(packed)
+            );
 
-            BlockPos wp = origin.offset(dx, dy, dz);
-            if (level.getBlockState(wp).is(struct.stateAt(i).getBlock()))
-                level.setBlock(wp, Blocks.AIR.defaultBlockState(), 3);
+            BlockState st = level.getBlockState(wp);
+            if (st.isAir()) continue;
+
+            if (st.hasProperty(BlockStateProperties.DOUBLE_BLOCK_HALF)) {
+                DoubleBlockHalf half = st.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF);
+                BlockPos bottom = (half == DoubleBlockHalf.LOWER) ? wp : null;
+
+                // Break the BOTTOM block  to stop potential dupes, as it seems that is the "master" block for doors.
+                // If you set the top block to air, the bottom one breaks a moment later and drops.
+                // If this doesn't work I declare it NOT MY FAULT!
+                // DoubleBlockHalf blocks should have a way to delete the entire thing at once god damnit
+                if (bottom != null && !level.getBlockState(bottom).isAir()) {
+                    level.setBlock(bottom, Blocks.AIR.defaultBlockState(), flags);
+                }
+            }
+        }
+
+        // Pass 2: remove likely-attached blocks first. This should stop duplication of torches/buttons/whatever else may break due to its supporting block being broken
+        for (int i = 0; i < struct.size(); i++) {
+            int packed = struct.packedPosAt(i);
+            BlockPos wp = origin.offset(unpackX(packed), unpackY(packed), unpackZ(packed));
+            BlockState st = level.getBlockState(wp);
+            if (st.isAir()) continue;
+
+            // Heuristic: if it isn't a full collision cube, it's often "attached" (buttons, torches, etc.)
+            if (!st.isCollisionShapeFullBlock(level, wp)) {
+                level.setBlock(wp, Blocks.AIR.defaultBlockState(), flags);
+            }
+        }
+
+        // Pass 3: remove the rest
+        for (int i = 0; i < struct.size(); i++) {
+            int packed = struct.packedPosAt(i);
+            BlockPos wp = origin.offset(unpackX(packed), unpackY(packed), unpackZ(packed));
+            if (!level.getBlockState(wp).isAir()) {
+                level.setBlock(wp, Blocks.AIR.defaultBlockState(), flags);
+            }
         }
     }
 

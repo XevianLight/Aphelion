@@ -62,8 +62,8 @@ public class VacuumArcFurnaceScreen extends AbstractContainerScreen<VacuumArcFur
     }
 
     private void renderEnergyBar(GuiGraphics guiGraphics, int x, int y) {
-        int stored = menu.blockEntity.getTrueEnergyStorage(null).getEnergyStored();
-        int max = menu.blockEntity.getTrueEnergyStorage(null).getMaxEnergyStored();
+        int stored = menu.blockEntity.getTrueEnergyStorage().getEnergyStored();
+        int max = menu.blockEntity.getTrueEnergyStorage().getMaxEnergyStored();
 
         int h = (max <= 0) ? 0 : (int) Math.round((stored / (double) max) * 42.0);
         h = Math.max(0, Math.min(42, h));
@@ -79,7 +79,7 @@ public class VacuumArcFurnaceScreen extends AbstractContainerScreen<VacuumArcFur
 
     private void assignEnergyInfoArea() {
         energyInfoArea = new EnergyDisplayTooltipArea(((width - imageWidth) / 2) + 9,
-                ((height - imageHeight) / 2 ) + 9, menu.blockEntity.getTrueEnergyStorage(null), 14, 42);
+                ((height - imageHeight) / 2 ) + 9, menu.blockEntity.getTrueEnergyStorage(), 14, 42);
     }
 
     private void renderEnergyAreaTooltip(GuiGraphics guiGraphics, int pMouseX, int pMouseY, int x, int y) {

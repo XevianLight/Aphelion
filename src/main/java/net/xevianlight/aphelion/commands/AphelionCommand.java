@@ -474,6 +474,22 @@ public class AphelionCommand {
                                                 )
                                         )
                                 )
+                                .then(Commands.literal("disassemble")
+                                        .executes(context -> {
+                                            Entity entity = EntityArgument.getEntity(context, "entity");
+
+                                            if (entity instanceof RocketEntity rocket) {
+                                                if (rocket.disassemble()) {
+                                                    context.getSource().sendSuccess(() -> Component.translatable("command.aphelion.rocket.disassemble.success"), true);
+                                                } else {
+                                                    context.getSource().sendFailure(Component.translatable("command.aphelion.rocket.disassemble.failure"));
+                                                }
+                                            } else {
+                                                context.getSource().sendFailure(Component.translatable("command.aphelion.rocket.entity_invalid"));
+                                            }
+                                            return 1;
+                                        })
+                                )
                         )
                 )
 

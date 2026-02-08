@@ -20,6 +20,24 @@ public class RocketAssemblerBlockEntityRenderer implements BlockEntityRenderer<R
     }
 
     @Override
+    public AABB getRenderBoundingBox(RocketAssemblerBlockEntity blockEntity) {
+        // If we don't know bounds yet, fall back to default BE culling.
+        RocketAssemblerBlockEntity.PadInfo pad = blockEntity.getPadBounds();
+        if (pad == null) {
+            return BlockEntityRenderer.super.getRenderBoundingBox(blockEntity);
+        }
+
+        BlockPos min = pad.min();
+        BlockPos max = pad.max();
+
+        // Expand slightly to avoid edge precision culling
+        return new AABB(
+                min.getX(), min.getY(), min.getZ(),
+                max.getX() + 1, max.getY() + 1, max.getZ() + 1
+        ).inflate(0.5);
+    }
+
+    @Override
     public void render(@NotNull RocketAssemblerBlockEntity be, float v, @NotNull PoseStack poseStack, @NotNull MultiBufferSource multiBufferSource, int i, int i1) {
 //        if (!Minecraft.getInstance().gui.getDebugOverlay().showDebugScreen()) return;
 

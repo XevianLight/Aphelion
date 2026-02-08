@@ -16,6 +16,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.phys.AABB;
 import net.xevianlight.aphelion.Aphelion;
 import net.xevianlight.aphelion.block.custom.base.TickableBlockEntity;
 import net.xevianlight.aphelion.core.init.ModBlockEntities;
@@ -35,6 +36,7 @@ public class RocketAssemblerBlockEntity extends BlockEntity implements TickableB
     Direction facing;
     BlockPos padScanStart = BlockPos.ZERO;
     private PadInfo padBounds;
+    RocketEntity lastRocket;
 
     public @Nullable PadInfo getPadBounds() {
         return padBounds;
@@ -279,11 +281,14 @@ public class RocketAssemblerBlockEntity extends BlockEntity implements TickableB
         if (level == null) return null;
         RocketStructure structure = scan();
         RocketEntity rocket = null;
+        if (lastRocket != null)
+            lastRocket.disassemble();
         if (structure != null && seatPos != null) {
             RocketStructure.clearCaptured(level, seatPos, structure);
             rocket = RocketEntity.spawnRocket(level, seatPos, structure);
             Aphelion.LOGGER.info("Spawn rocket result: {}", rocket);
         }
+        lastRocket = rocket;
         return rocket;
     }
 
@@ -394,4 +399,6 @@ public class RocketAssemblerBlockEntity extends BlockEntity implements TickableB
             this.loadAdditional(tag, registries);
         }
     }
+
+    
 }

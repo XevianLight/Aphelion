@@ -12,13 +12,14 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.items.SlotItemHandler;
 import net.xevianlight.aphelion.block.entity.custom.ElectricArcFurnaceEntity;
+import net.xevianlight.aphelion.block.entity.custom.IArcFurnaceLike;
 import net.xevianlight.aphelion.util.EnergyItemSlot;
 import net.xevianlight.aphelion.util.ExtractOnlySlot;
 import org.jetbrains.annotations.NotNull;
 
 public class ElectricArcFurnaceMenu extends AbstractContainerMenu {
 
-    public final ElectricArcFurnaceEntity blockEntity;
+    public final IArcFurnaceLike blockEntity;
     private final Level level;
     private final ContainerData data;
 
@@ -28,17 +29,17 @@ public class ElectricArcFurnaceMenu extends AbstractContainerMenu {
 
     public ElectricArcFurnaceMenu(int i, Inventory inventory, BlockEntity blockEntity, ContainerData data) {
         super(ModMenuTypes.ELECTRIC_ARC_FURNACE_MENU.get(), i);
-        this.blockEntity = ((ElectricArcFurnaceEntity) blockEntity);
+        this.blockEntity = ((IArcFurnaceLike) blockEntity);
         this.level = inventory.player.level();
         this.data = data;
 
         addPlayerInventory(inventory);
         addPlayerHotbar(inventory);
 
-        this.addSlot(new EnergyItemSlot(this.blockEntity.inventory, ElectricArcFurnaceEntity.ENERGY_SLOT, 8, 54));
-        this.addSlot(new SlotItemHandler(this.blockEntity.inventory, ElectricArcFurnaceEntity.INPUT_SLOT, 63, 35));
-        this.addSlot(new SlotItemHandler(this.blockEntity.inventory, ElectricArcFurnaceEntity.SECONDARY_INPUT_SLOT, 40, 35));
-        this.addSlot(new ExtractOnlySlot(this.blockEntity.inventory, ElectricArcFurnaceEntity.OUTPUT_SLOT, 125, 35));
+        this.addSlot(new EnergyItemSlot(this.blockEntity.getInventory(), ElectricArcFurnaceEntity.ENERGY_SLOT, 8, 54));
+        this.addSlot(new SlotItemHandler(this.blockEntity.getInventory(), ElectricArcFurnaceEntity.INPUT_SLOT, 63, 35));
+        this.addSlot(new SlotItemHandler(this.blockEntity.getInventory(), ElectricArcFurnaceEntity.SECONDARY_INPUT_SLOT, 40, 35));
+        this.addSlot(new ExtractOnlySlot(this.blockEntity.getInventory(), ElectricArcFurnaceEntity.OUTPUT_SLOT, 125, 35));
 
         addDataSlots(data);
     }
