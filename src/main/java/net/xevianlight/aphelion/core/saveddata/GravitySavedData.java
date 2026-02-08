@@ -32,12 +32,18 @@ import java.util.List;
  */
 public class GravitySavedData extends SavedData {
 
+    private Level level;
+
     private final Long2IntOpenHashMap gravityData = new Long2IntOpenHashMap();
 
     private static final String NAME = "aphelion_gravity";
 
-    public static GravitySavedData create() {
-        return new GravitySavedData();
+    public static GravitySavedData create(Level level) {
+        return new GravitySavedData(level);
+    }
+
+    public GravitySavedData(Level level) {
+        this.level = level;
     }
 
     @Override
@@ -60,18 +66,18 @@ public class GravitySavedData extends SavedData {
         return tag;
     }
 
-    public static GravitySavedData load(CompoundTag tag, HolderLookup.Provider lookupProvider) {
-        GravitySavedData data = create();
+    public static GravitySavedData load(CompoundTag tag, HolderLookup.Provider lookupProvider, Level level) {
+        GravitySavedData data = new GravitySavedData(level);
 
-        if (!tag.contains("Position", Tag.TAG_LONG_ARRAY) || !tag.contains("Value", Tag.TAG_INT_ARRAY)) { return data; }
+        if (!tag.contains("Position", Tag.TAG_LONG_ARRAY) || !tag.contains("Value", Tag.TAG_INT_ARRAY)) {
+            return data;
+        }
 
         long[] positions = tag.getLongArray("Position");
         int[] values = tag.getIntArray("Value");
-
         int length = Math.min(positions.length, values.length);
 
         data.gravityData.ensureCapacity(length);
-
         for (int i = 0; i < length; i++) {
             data.gravityData.put(positions[i], values[i]);
         }
@@ -81,7 +87,7 @@ public class GravitySavedData extends SavedData {
 
     private static final int ABSENT = Integer.MIN_VALUE;
 
-    public @Nullable GravityData getGravityRegionData (Level level, BlockPos center) {
+    public @Nullable GravityData getGravityRegionData (BlockPos center) {
         GravityData data = GravityData.unpack(gravityData.getOrDefault(center.asLong(), ABSENT));
         return data.pack() == ABSENT ? null : data;
     }
@@ -128,7 +134,7 @@ public class GravitySavedData extends SavedData {
         }
 
         if (max == -1) {
-            max = GravityData.DEFAULT_GRAVITY;
+            max = defaultGravity(this.level);
         }
 
         return max;
@@ -165,7 +171,10 @@ public class GravitySavedData extends SavedData {
 
     public static GravitySavedData get(ServerLevel level) {
         return level.getDataStorage().computeIfAbsent(
-                new Factory<>(GravitySavedData::create, GravitySavedData::load),
+                new Factory<>(
+                        () -> new GravitySavedData(level),
+                        (tag, provider) -> GravitySavedData.load(tag, provider, level)
+                ),
                 NAME
         );
     }
