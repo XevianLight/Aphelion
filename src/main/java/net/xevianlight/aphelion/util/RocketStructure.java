@@ -11,6 +11,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.phys.AABB;
+import net.xevianlight.aphelion.block.custom.base.IRocketEnergyUpgrade;
+import net.xevianlight.aphelion.block.custom.base.IRocketFluidUpgrade;
+import net.xevianlight.aphelion.block.custom.base.IRocketFuelUpgrade;
+import net.xevianlight.aphelion.block.custom.base.IRocketInventoryUpgrade;
+import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -151,27 +156,6 @@ public final class RocketStructure {
         return new Extents(minX, minY, minZ, maxX, maxY, maxZ);
     }
 
-    public static RocketStructure capture(Level level, BlockPos origin, int rx, int ry, int rz) {
-        return new RocketStructure(s -> {
-            for (int dy = -ry; dy <= ry; dy++) {
-                for (int dx = -rx; dx <= rx; dx++) {
-                    for (int dz = -rz; dz <= rz; dz++) {
-                        BlockPos p = origin.offset(dx, dy, dz);
-                        BlockState st = level.getBlockState(p);
-
-                        // Skip air and unbreakables/forbidden blocks as you like
-                        if (st.isAir()) continue;
-
-                        // Optional: ignore the assembler block itself
-                        // if (p.equals(origin)) continue;
-
-                        s.add(dx, dy, dz, st);
-                    }
-                }
-            }
-        });
-    }
-
     public static void clearCaptured(Level level, BlockPos origin, RocketStructure struct) {
         final int flags = Block.UPDATE_CLIENTS;
 
@@ -229,5 +213,61 @@ public final class RocketStructure {
 
     public void addSeatOffset(int dx, int dy, int dz) {
         seatOffsets.add(packPos(dx, dy, dz));
+    }
+
+    public static int calculateInventoryCapacity(RocketStructure structure) {
+        int totalSlots = 0;
+        for (int i = 0; i < structure.size(); i++) {
+            BlockState st = structure.stateAt(i);
+            Block block = st.getBlock();
+
+            if (block instanceof IRocketInventoryUpgrade upgrade) {
+                int slots = upgrade.getSlotCapacity();
+                if (slots > 0) totalSlots += slots;
+            }
+        }
+        return totalSlots;
+    }
+
+    public static int calculateFuelCapacity(RocketStructure structure) {
+        int totalMB = 0;
+        for (int i = 0; i < structure.size(); i++) {
+            BlockState st = structure.stateAt(i);
+            Block block = st.getBlock();
+
+            if (block instanceof IRocketFuelUpgrade upgrade) {
+                int mb = upgrade.getFuelCapacity();
+                if (mb > 0) totalMB += mb;
+            }
+        }
+        return totalMB;
+    }
+
+    public static int calculateFluidCapacity(RocketStructure structure) {
+        int totalMB = 0;
+        for (int i = 0; i < structure.size(); i++) {
+            BlockState st = structure.stateAt(i);
+            Block block = st.getBlock();
+
+            if (block instanceof IRocketFluidUpgrade upgrade) {
+                int mb = upgrade.getFluidCapacity();
+                if (mb > 0) totalMB += mb;
+            }
+        }
+        return totalMB;
+    }
+
+    public static int calculateEnergyCapacity(RocketStructure structure) {
+        int totalFE = 0;
+        for (int i = 0; i < structure.size(); i++) {
+            BlockState st = structure.stateAt(i);
+            Block block = st.getBlock();
+
+            if (block instanceof IRocketEnergyUpgrade upgrade) {
+                int fe = upgrade.getEnergyCapacity();
+                if (fe > 0) totalFE += fe;
+            }
+        }
+        return totalFE;
     }
 }

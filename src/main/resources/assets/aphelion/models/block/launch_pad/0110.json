@@ -3,6 +3,6 @@
   "textures": {
     "top": "aphelion:block/launch_pad/0110",
     "side": "aphelion:block/launch_pad/topbottom",
-    "bottom": "aphelion:block/launch_pad/0110"
+    "bottom": "aphelion:block/launch_pad/1100"
   }
 }

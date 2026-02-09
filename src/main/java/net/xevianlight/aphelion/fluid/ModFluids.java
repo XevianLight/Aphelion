@@ -24,19 +24,19 @@ public class ModFluids {
     public static final DeferredRegister<Fluid> FLUIDS =
             DeferredRegister.create(BuiltInRegistries.FLUID, Aphelion.MOD_ID);
 
-    public static final Supplier<FlowingFluid> SOURCE_OIL_FLUID = FLUIDS.register("oil",
+    public static final Supplier<FlowingFluid> OIL = FLUIDS.register("oil",
             () -> new BaseFlowingFluid.Source(ModFluids.OIL_PROPERTIES));
-    public static final Supplier<FlowingFluid> FLOWING_OIL_FLUID = FLUIDS.register("flowing_oil",
+    public static final Supplier<FlowingFluid> FLOWING_OIL = FLUIDS.register("flowing_oil",
             () -> new BaseFlowingFluid.Flowing(ModFluids.OIL_PROPERTIES));
 
     public static final DeferredBlock<LiquidBlock> OIL_BLOCK = ModBlocks.BLOCKS.register("oil",
-        () -> new LiquidBlock(ModFluids.SOURCE_OIL_FLUID.get(), BlockBehaviour.Properties.ofFullCopy(Blocks.WATER).noLootTable()));
+        () -> new LiquidBlock(ModFluids.OIL.get(), BlockBehaviour.Properties.ofFullCopy(Blocks.WATER).noLootTable()));
 
     public static final DeferredItem<Item> OIL_BUCKET = ModItems.ITEMS.registerItem("oil_bucket",
-            properties -> new BucketItem(ModFluids.SOURCE_OIL_FLUID.get(), properties.stacksTo(1).craftRemainder(Items.BUCKET)));
+            properties -> new BucketItem(ModFluids.OIL.get(), properties.stacksTo(1).craftRemainder(Items.BUCKET)));
 
     public static final BaseFlowingFluid.Properties OIL_PROPERTIES = new BaseFlowingFluid.Properties(
-            ModFluidTypes.OIL_FLUID_TYPE, SOURCE_OIL_FLUID, FLOWING_OIL_FLUID)
+            ModFluidTypes.OIL_FLUID_TYPE, OIL, FLOWING_OIL)
             .slopeFindDistance(2).levelDecreasePerBlock(2).tickRate(10)
             .block(ModFluids.OIL_BLOCK).bucket(ModFluids.OIL_BUCKET);
 

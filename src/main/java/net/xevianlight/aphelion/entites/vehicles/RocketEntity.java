@@ -2,6 +2,7 @@ package net.xevianlight.aphelion.entites.vehicles;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -13,13 +14,16 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.VehicleEntity;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -27,9 +31,14 @@ import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.entity.IEntityWithComplexSpawn;
+import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
+import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
+import net.neoforged.neoforge.items.ItemStackHandler;
 import net.xevianlight.aphelion.Aphelion;
+import net.xevianlight.aphelion.block.entity.energy.ModEnergyStorage;
 import net.xevianlight.aphelion.core.init.ModEntities;
+import net.xevianlight.aphelion.fluid.ModFluids;
 import net.xevianlight.aphelion.util.RocketStructure;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -63,6 +72,43 @@ public class RocketEntity extends VehicleEntity implements IEntityWithComplexSpa
     private static final EntityDataAccessor<CompoundTag> STRUCTURE_TAG =
             SynchedEntityData.defineId(RocketEntity.class, EntityDataSerializers.COMPOUND_TAG);
 
+    private final FluidTank FUEL_TANK = newFuelTank(0);
+    private final FluidTank FLUID_STORAGE = newFluidTank(0);
+    private final ModEnergyStorage ENERGY_STORAGE = newEnergyStorage(0, 0);
+    private final ItemStackHandler INVENTORY = new ItemStackHandler(0);
+
+    public ItemStackHandler getInventory() {
+        return INVENTORY;
+    }
+
+    private static @NotNull FluidTank newFluidTank(int capacity) {
+        return new FluidTank(capacity) {
+            @Override
+            public boolean isFluidValid(@NotNull FluidStack stack) {
+                return true;
+            }
+        };
+    }
+
+    private static @NotNull FluidTank newFuelTank(int capacity) {
+        return new FluidTank(capacity) {
+            @Override
+            public boolean isFluidValid(@NotNull FluidStack stack) {
+                return stack.is(FluidTags.WATER);
+            }
+        };
+    }
+
+    private static @NotNull ModEnergyStorage newEnergyStorage(int capacity, int transfer) {
+        return new ModEnergyStorage(capacity, transfer) {
+            @Override
+            public void onEnergyChanged() {
+
+            }
+        };
+    }
+
+
     public static RocketEntity spawnRocket(Level level, BlockPos pos, RocketStructure structure) {
         if (level.isClientSide) return null;
 
@@ -79,7 +125,23 @@ public class RocketEntity extends VehicleEntity implements IEntityWithComplexSpa
         rocket.setStructure(structure);
         level.addFreshEntity(rocket);
 
+        rocket.FUEL_TANK.setFluid(new FluidStack(ModFluids.OIL.get(), 1000));
+        rocket.INVENTORY.setSize(rocket.INVENTORY.getSlots() + 1);
+        rocket.INVENTORY.insertItem(0, new ItemStack(Items.DIAMOND, 1), false);
+
         return rocket;
+    }
+
+    private void recalculateCapacitiesFromStructure() {
+        int inv = RocketStructure.calculateInventoryCapacity(structure);
+        int fuelCap = RocketStructure.calculateFuelCapacity(structure);
+        int fluidCap = RocketStructure.calculateFluidCapacity(structure);
+        int energyCap = RocketStructure.calculateEnergyCapacity(structure);
+
+        INVENTORY.setSize(inv);
+        FUEL_TANK.setCapacity(fuelCap);
+        FLUID_STORAGE.setCapacity(fluidCap);
+        ENERGY_STORAGE.setCapacity(energyCap);
     }
 
     public void launchTo(ResourceKey<Level> dim, @Nullable BlockPos pos) {
@@ -119,7 +181,6 @@ public class RocketEntity extends VehicleEntity implements IEntityWithComplexSpa
                 }
                 case DESCEND -> tickDescend();
             }
-            // Simple upward movement
 
         }
 
@@ -280,12 +341,13 @@ public class RocketEntity extends VehicleEntity implements IEntityWithComplexSpa
         this.refreshDimensions();
         this.setBoundingBox(this.makeBoundingBox());
 
-        // prevent any internal “snap” from sticking
         this.moveTo(x, y, z, yRot, xRot);
 
         if (!level().isClientSide) {
             this.entityData.set(STRUCTURE_TAG, this.structure.save());
         }
+
+        recalculateCapacitiesFromStructure();
     }
 
     @Override
@@ -326,9 +388,12 @@ public class RocketEntity extends VehicleEntity implements IEntityWithComplexSpa
 
     @Override
     protected void readAdditionalSaveData(CompoundTag tag) {
+        HolderLookup.Provider registries = level().registryAccess();
+
         if (tag.contains("RocketStructure")) {
             CompoundTag rocketTag = tag.getCompound("RocketStructure");
             structure.load(rocketTag);
+            recalculateCapacitiesFromStructure();
 
             // Immediately apply correct bbox on load (server + client)
             double x = getX(), y = getY(), z = getZ();
@@ -362,10 +427,22 @@ public class RocketEntity extends VehicleEntity implements IEntityWithComplexSpa
         if (tag.contains("FlightPhase", Tag.TAG_BYTE)) {
             setPhase(FlightPhase.values()[tag.getByte("FlightPhase")]);
         }
+
+        if (tag.contains("Inventory", CompoundTag.TAG_COMPOUND)){
+            INVENTORY.deserializeNBT(registries, tag.getCompound("Inventory"));
+        }
+
+        FUEL_TANK.readFromNBT(registries, tag);
+        FLUID_STORAGE.readFromNBT(registries, tag);
+
+        if (tag.contains("Energy", CompoundTag.TAG_COMPOUND)) {
+            ENERGY_STORAGE.deserializeNBT(registries, tag.getCompound("Energy"));
+        }
     }
 
     @Override
     protected void addAdditionalSaveData(CompoundTag tag) {
+        HolderLookup.Provider registries = level().registryAccess();
         tag.put("RocketStructure", structure.save());
         if (targetDim != null)
             tag.putString("TargetDim", targetDim.location().toString());
@@ -376,6 +453,10 @@ public class RocketEntity extends VehicleEntity implements IEntityWithComplexSpa
         tag.putDouble("LandingX", landingPosX);
         tag.putDouble("LandingZ", landingPosZ);
         tag.putDouble("yVelocity", yVel);
+        tag.put("Inventory", INVENTORY.serializeNBT(registries));
+        tag = FUEL_TANK.writeToNBT(registries, tag);
+        tag = FLUID_STORAGE.writeToNBT(registries, tag);
+        tag.put("Energy", ENERGY_STORAGE.serializeNBT(registries));
     }
 
     public @Nullable BlockPos getTargetPos() {
@@ -438,7 +519,7 @@ public class RocketEntity extends VehicleEntity implements IEntityWithComplexSpa
     }
 
 
-    public Vec3 getSeatWorldPos(int seatIndex, float partialTicks) {
+    public Vec3 getSeatWorldPos(int seatIndex) {
         int packed = structure.packedSeatAt(seatIndex);
 
         int dx = RocketStructure.unpackX(packed);
@@ -449,10 +530,10 @@ public class RocketEntity extends VehicleEntity implements IEntityWithComplexSpa
     }
 
     @Override
-    public void positionRider(Entity passenger, MoveFunction move) {
+    public void positionRider(@NotNull Entity passenger, @NotNull MoveFunction move) {
         if (!this.hasPassenger(passenger)) return;
 
-        Vec3 seat = getSeatWorldPos(0, 0); // primary seat
+        Vec3 seat = getSeatWorldPos(0); // primary seat
         move.accept(passenger, seat.x, seat.y, seat.z);
 
     }
@@ -473,7 +554,7 @@ public class RocketEntity extends VehicleEntity implements IEntityWithComplexSpa
 
     public void applyStructureTag(CompoundTag structureTag) {
         this.structure.load(structureTag);
-        this.refreshDimensions(); // if your hitbox/eye depends on structure
+        this.refreshDimensions();
     }
 
     private AABB computeWorldAABBFromStructure() {
@@ -510,16 +591,14 @@ public class RocketEntity extends VehicleEntity implements IEntityWithComplexSpa
         if (level().isClientSide) return false;
         if (!(level() instanceof ServerLevel server)) return false;
 
-        // Optional: only allow when not in flight
-        if (getPhase() == FlightPhase.ASCEND || getPhase() == FlightPhase.TRANSIT || getPhase() == FlightPhase.DESCEND) {
-            return false;
-        }
+        // In rare instances we can disassemble a rocket AFTER it has been killed.
+        // This usually only happens if another class instance still has a reference to this object stored and calls rocketEntity.disassemble().
+        // This SHOULD fix that
+        if (!this.isAlive()) return false;          // dead
+        if (this.isRemoved()) return false;         // discarded / removed
 
-        // Kick riders off first (so we don't place blocks inside them)
         ejectPassengers();
 
-        // Anchor: blocks were captured relative to the scan origin.
-        // Your rocket is spawned at seatPos + (0.5, 0, 0.5), so we convert back to the block origin.
         BlockPos origin = BlockPos.containing(getX(), getY(), getZ());
 
         // Place blocks
@@ -538,15 +617,8 @@ public class RocketEntity extends VehicleEntity implements IEntityWithComplexSpa
 
             // Safety: don't overwrite existing blocks
             if (!server.getBlockState(wp).isAir()) {
-                // If you want strict behavior, abort entirely:
-                // return false;
-
-                // Otherwise just skip conflicts:
                 continue;
             }
-
-            // Extra safety: avoid accidentally placing into portal/void/etc if desired
-            // if (!server.isInWorldBounds(wp)) continue;
 
             server.setBlock(wp, stateToPlace, 3);
         }
@@ -556,4 +628,30 @@ public class RocketEntity extends VehicleEntity implements IEntityWithComplexSpa
         return true;
     }
 
+    public static void dropItemStackHandler(ServerLevel level, Vec3 pos, ItemStackHandler handler) {
+        for (int i = 0; i < handler.getSlots(); i++) {
+            ItemStack stack = handler.getStackInSlot(i);
+            if (!stack.isEmpty()) {
+                ItemStack toDrop = stack.copy();
+                handler.setStackInSlot(i, ItemStack.EMPTY);
+
+                ItemEntity ent = new ItemEntity(level, pos.x, pos.y, pos.z, toDrop);
+                level.addFreshEntity(ent);
+            }
+        }
+    }
+
+    @Override
+    public void kill() {
+        if (!level().isClientSide())
+            dropItemStackHandler((ServerLevel) level(), position(), INVENTORY);
+        super.kill();
+    }
+
+    @Override
+    public void onRemovedFromLevel() {
+        if (!level().isClientSide())
+            dropItemStackHandler((ServerLevel) level(), position(), INVENTORY);
+        super.onRemovedFromLevel();
+    }
 }

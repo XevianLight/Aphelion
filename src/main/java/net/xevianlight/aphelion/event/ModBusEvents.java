@@ -13,6 +13,8 @@ import net.xevianlight.aphelion.block.entity.custom.ElectricArcFurnaceEntity;
 import net.xevianlight.aphelion.block.entity.custom.TestBlockEntity;
 import net.xevianlight.aphelion.block.entity.custom.VacuumArcFurnaceControllerEntity;
 import net.xevianlight.aphelion.core.init.ModBlockEntities;
+import net.xevianlight.aphelion.core.init.ModEntities;
+import net.xevianlight.aphelion.entites.vehicles.RocketEntity;
 import net.xevianlight.aphelion.network.RocketPayloadHandlers;
 import net.xevianlight.aphelion.network.PartitionPayloadHandler;
 import net.xevianlight.aphelion.network.packet.PartitionPayload;
@@ -30,6 +32,8 @@ public class ModBusEvents {
 //        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.VAF_MULTIBLOCK_DUMMY_ENTITY.get(), VAFMultiblockDummyBlockEntity::getItemHandler);
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntities.VAF_MULTIBLOCK_DUMMY_ENTITY.get(), BaseMultiblockDummyBlockEntity::getItemHandler);
         event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, ModBlockEntities.VAF_MULTIBLOCK_DUMMY_ENTITY.get(), BaseMultiblockDummyBlockEntity::getEnergyStorage);
+
+        event.registerEntity(Capabilities.ItemHandler.ENTITY, ModEntities.ROCKET.get(), (rocket, ctx) -> rocket.getInventory());
     }
 
     @SubscribeEvent
