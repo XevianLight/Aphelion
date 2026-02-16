@@ -1,0 +1,18 @@
+{
+  "textures": {
+    "texture": "aphelion:block/pipe_texture"
+  },
+  "elements": [
+    {
+      "from": [ 6, 6, 0 ],
+      "to": [ 10, 10, 6 ],
+      "faces": {
+        "down":  { "texture": "#texture", "uv": [ 6, 0, 10, 6 ] },
+        "up":    { "texture": "#texture", "uv": [ 6, 0, 10, 6 ] },
+        "north": { "texture": "#texture", "uv": [ 6, 6, 10, 10 ] },
+        "west":  { "texture": "#texture", "uv": [ 0, 6, 6, 10 ] },
+        "east":  { "texture": "#texture", "uv": [ 0, 6, 6, 10 ] }
+      }
+    }
+  ]
+}
