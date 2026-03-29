@@ -4,6 +4,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.xevianlight.aphelion.Aphelion;
+import net.xevianlight.aphelion.block.entity.custom.StationRocketEngineBlockEntity;
 import net.xevianlight.aphelion.block.dummy.entity.VAFMultiblockDummyBlockEntity;
 import net.xevianlight.aphelion.block.entity.custom.*;
 
@@ -50,5 +51,15 @@ public class ModBlockEntities {
     public static final Supplier<BlockEntityType<RocketAssemblerBlockEntity>> ROCKET_ASSEMBLER_BLOCK_ENTITY =
             BLOCK_ENTITIES.register("rocket_assembler_block_entity", () -> BlockEntityType.Builder.of(
                     RocketAssemblerBlockEntity::new, ModBlocks.ROCKET_ASSEMBLER.get()).build(null)
+            );
+
+    public static final Supplier<BlockEntityType<StationRocketEngineBlockEntity>> STATION_ROCKET_ENGINE_BLOCK_ENTITY =
+            BLOCK_ENTITIES.register("station_rocket_engine_block_entity", () -> BlockEntityType.Builder.of(
+                    StationRocketEngineBlockEntity::new, ModBlocks.STATION_ROCKET_ENGINE.get()).build(null)
+            );
+
+    public static final Supplier<BlockEntityType<StationFlightComputerBlockEntity>> STATION_FLIGHT_COMPUTER_BLOCK_ENTITY =
+            BLOCK_ENTITIES.register("station_flight_computer_block_entity", () -> BlockEntityType.Builder.of(
+                    StationFlightComputerBlockEntity::new, ModBlocks.STATION_FLIGHT_COMPUTER_BLOCK.get()).build(null)
             );
 }

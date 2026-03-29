@@ -105,7 +105,7 @@ public class SpacePartitionSavedData extends SavedData {
             e.putBoolean("Traveling", pd.isTraveling());
 
             e.putDouble("DistanceTraveled", pd.getDistanceTraveledAU());
-            e.putDouble("DistanceToDest", pd.getTripDistanceAU());
+            e.putDouble("DistanceToDest", pd.recalculateTripDistAU());
 
             if (pd.getOwner() != null) {
                 e.putUUID("Owner", pd.getOwner());

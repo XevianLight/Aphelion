@@ -58,6 +58,8 @@ public interface TickableBlockEntity {
      * <p>Implementations should return {@code true} once initialization has finished
      * to prevent {@code firstTick} from running again.</p>
      *
+     * <p>Returns {@code true} if not implemented.</p>
+     *
      * @return {@code true} if initialization has completed, {@code false} otherwise
      */
     default boolean isInitialized() {
@@ -73,6 +75,8 @@ public interface TickableBlockEntity {
      *
      * <p>Implementations should perform any required setup and ensure that
      * {@code isInitialized()} returns {@code true} afterward.</p>
+     *
+     * <p>Will never run if {@link #isInitialized()} is not implemented.</p>
      *
      * @param level the level the block entity exists in
      * @param state the current block state

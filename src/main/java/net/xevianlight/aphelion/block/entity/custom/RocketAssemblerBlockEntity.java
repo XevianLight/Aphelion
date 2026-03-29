@@ -33,13 +33,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RocketAssemblerBlockEntity extends BlockEntity implements TickableBlockEntity {
 
     Direction facing;
     BlockPos padScanStart = BlockPos.ZERO;
     private PadInfo padBounds;
-    RocketEntity lastRocket;
 
     private @Nullable PartitionData data;
 
@@ -296,14 +297,17 @@ public class RocketAssemblerBlockEntity extends BlockEntity implements TickableB
         if (level == null) return null;
         RocketStructure structure = scan();
         RocketEntity rocket = null;
-        if (lastRocket != null)
-            lastRocket.disassemble();
+
+        var rockets = getRocketsInPad();
+        if (rockets.size() == 1) rocket = rockets.getFirst();
+        if (rocket != null)
+            rocket.disassemble();
+
         if (structure != null && seatPos != null) {
             RocketStructure.clearCaptured(level, seatPos, structure);
             rocket = RocketEntity.spawnRocket(level, seatPos, structure);
             Aphelion.LOGGER.info("Spawn rocket result: {}", rocket);
         }
-        lastRocket = rocket;
         return rocket;
     }
 
@@ -371,6 +375,38 @@ public class RocketAssemblerBlockEntity extends BlockEntity implements TickableB
 
     private static boolean isTower(BlockState s) {
         return s.is(TOWER_BLOCK);
+    }
+
+    public @NotNull List<RocketEntity> getRocketsInPad() {
+        if (level == null || padBounds == null) return List.of();
+
+        AABB padBox = new AABB(
+                padBounds.min().getX(),
+                padBounds.min().getY(),
+                padBounds.min().getZ(),
+                padBounds.max().getX() + 1,
+                padBounds.max().getY() + 1,
+                padBounds.max().getZ() + 1
+        );
+
+        var rockets = new ArrayList<>(level.getEntitiesOfClass(RocketEntity.class, padBox.inflate(0.2)));
+
+        List<RocketEntity> found = new java.util.ArrayList<>(List.of());
+
+        for (RocketEntity rocket : rockets) {
+            AABB rocketBox = rocket.getBoundingBox();
+            if (!isFullyInside(padBox, rocketBox)) continue;
+
+            found.add(rocket);
+        }
+
+        return found;
+    }
+
+    private static boolean isFullyInside(AABB outer, AABB inner) {
+        return inner.minX >= outer.minX && inner.maxX <= outer.maxX
+                && inner.minY >= outer.minY && inner.maxY <= outer.maxY
+                && inner.minZ >= outer.minZ && inner.maxZ <= outer.maxZ;
     }
 
     @Override

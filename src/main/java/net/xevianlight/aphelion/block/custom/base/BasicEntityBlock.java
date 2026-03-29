@@ -29,6 +29,10 @@ public abstract class BasicEntityBlock extends BaseEntityBlock {
         return RenderShape.MODEL;
     }
 
+    public static Properties getProperties() {
+        return Properties.of();
+    }
+
     public static Item.Properties getItemProperties() {
         return new Item.Properties();
     }

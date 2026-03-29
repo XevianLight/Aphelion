@@ -1,6 +1,8 @@
 package net.xevianlight.aphelion;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.api.distmarker.Dist;
@@ -127,14 +129,15 @@ public class Aphelion {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
             event.enqueueWork(() -> {
-//                ItemBlockRenderTypes.setRenderLayer(ModFluids.SOURCE_OIL_FLUID.get(), RenderType.translucent());
-//                ItemBlockRenderTypes.setRenderLayer(ModFluids.FLOWING_OIL_FLUID.get(), RenderType.translucent());
+                ItemBlockRenderTypes.setRenderLayer(ModFluids.ROCKET_FUEL.get(), RenderType.translucent());
+                ItemBlockRenderTypes.setRenderLayer(ModFluids.FLOWING_ROCKET_FUEL.get(), RenderType.translucent());
             });
         }
 
         @SubscribeEvent
         public static void onClientExtensions(RegisterClientExtensionsEvent event) {
             event.registerFluidType(((BaseFluidType) ModFluidTypes.OIL_FLUID_TYPE.get()).getClientFluidTypeExtensions(), ModFluidTypes.OIL_FLUID_TYPE.get());
+            event.registerFluidType(((BaseFluidType) ModFluidTypes.ROCKET_FUEL_FLUID_TYPE.get()).getClientFluidTypeExtensions(), ModFluidTypes.ROCKET_FUEL_FLUID_TYPE.get());
         }
 
         @SubscribeEvent
