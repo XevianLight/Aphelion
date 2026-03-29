@@ -38,5 +38,8 @@ public static final DeferredItem<Item> MUSIC_DISC_BIT_SHIFT = ITEMS.register("mu
     public static final DeferredItem<BlockItem> LAUNCH_PAD = ITEMS.register("launch_pad", () -> new BlockItem(ModBlocks.LAUNCH_PAD.get(), LaunchPad.getItemProperties()));
     public static final DeferredItem<BlockItem> ROCKET_ASSEMBLER = ITEMS.register("rocket_assembler", () -> new BlockItem(ModBlocks.ROCKET_ASSEMBLER.get(), RocketAssembler.getItemProperties()));
     public static final DeferredItem<BlockItem> ROCKET_SEAT = ITEMS.register("rocket_seat", () -> new BlockItem(ModBlocks.ROCKET_SEAT.get(), RocketSeat.getItemProperties()));
+    public static final DeferredItem<BlockItem> STATION_ROCKET_ENGINE = ITEMS.register("station_rocket_engine", () -> new BlockItem(ModBlocks.STATION_ROCKET_ENGINE.get(), StationRocketEngineBlock.getItemProperties()));
+    public static final DeferredItem<BlockItem> BASIC_ROCKET_FUEL_TANK = ITEMS.register("basic_rocket_fuel_tank", () -> new BlockItem(ModBlocks.BASIC_ROCKET_FUEL_TANK.get(), BasicRocketFuelTank.getItemProperties()));
+    public static final DeferredItem<BlockItem> BASIC_ROCKET_CONTAINER = ITEMS.register("basic_rocket_container", () -> new BlockItem(ModBlocks.BASIC_ROCKET_CONTAINER.get(), BasicRocketContainer.getItemProperties()));
 //    public static final DeferredItem<BlockItem> VAF_MULTIBLOCK_DUMMY_BLOCK = ITEMS.register("vaf_multiblock_dummy_block", () -> new BlockItem(ModBlocks.VAF_MULTIBLOCK_DUMMY_BLOCK.get(), VAFMultiblockDummyBlock.getItemProperties()));
 }

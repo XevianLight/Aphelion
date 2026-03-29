@@ -6,6 +6,7 @@ import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
+import net.xevianlight.aphelion.planet.PlanetCache;
 import net.xevianlight.aphelion.util.BigCodec;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,6 +27,11 @@ public class PartitionData {
     private UUID owner;
     private List<BlockPos> landingPadControllers;
     private List<BlockPos> engines;
+    private double currentOrbitDistanceAU;
+
+    public PartitionData() {
+
+    }
 
     public PartitionData(@Nullable ResourceLocation orbit) {
         this.orbit = orbit;
@@ -36,7 +42,7 @@ public class PartitionData {
         this.generated = false;
         this.owner = null;
         this.landingPadControllers = List.of();
-        this.engines = List.of();
+        this.engines = new ArrayList<>(List.of());
     }
 
     public PartitionData(PartitionData other) {
@@ -68,7 +74,7 @@ public class PartitionData {
                     PartitionData::getDistanceTraveledAU,
 
                     ByteBufCodecs.DOUBLE,
-                    PartitionData::getTripDistanceAU,
+                    PartitionData::recalculateTripDistAU,
 
                     ByteBufCodecs.optional(UUIDUtil.STREAM_CODEC),
                     d -> Optional.ofNullable(d.getOwner()),
@@ -102,6 +108,8 @@ public class PartitionData {
 
     public void setOrbit(@Nullable ResourceLocation orbit) {
         this.orbit = orbit;
+        recalculateTripDistAU();
+        distanceTraveledAU = 0;
     }
 
     public @Nullable ResourceLocation getDestination() {
@@ -110,6 +118,8 @@ public class PartitionData {
 
     public void setDestination(@Nullable ResourceLocation destination) {
         this.destination = destination;
+        recalculateTripDistAU();
+        distanceTraveledAU = 0;
     }
 
     public boolean isTraveling() {
@@ -126,6 +136,19 @@ public class PartitionData {
 
     public void setDistanceTraveledAU(double distanceTraveledAU) {
         this.distanceTraveledAU = distanceTraveledAU;
+    }
+
+    public double recalculateTripDistAU() {
+        var currentPlanet = PlanetCache.getByOrbitOrNull(orbit);
+        if (currentPlanet == null) {
+            return -1;
+        }
+
+        var destPlanet = PlanetCache.getOrDefault(destination);
+
+        var dist = destPlanet.orbitDistance() - currentPlanet.orbitDistance();
+        this.tripDistanceAU = dist;
+        return dist;
     }
 
     public double getTripDistanceAU() {
@@ -146,9 +169,20 @@ public class PartitionData {
      * distance is set to exactly {@code tripDistanceAU}.</p>
      *
      * @param distance the distance to advance in astronomical units (AU)
+     * @return {@code true} when we arrive at our destination, {@code false} otherwise.
      */
-    public void travel(double distance) {
-        distanceTraveledAU = Math.min(distanceTraveledAU + distance, tripDistanceAU);
+    public boolean travel(double distance) {
+        if (distanceTraveledAU + distance > tripDistanceAU) {
+            distanceTraveledAU = tripDistanceAU;
+            var destinationPlanet = PlanetCache.getOrNull(destination);
+            if (destinationPlanet != null) {
+                setOrbit(destinationPlanet.orbit().location());
+            }
+            return false;
+        } else {
+            distanceTraveledAU += distance;
+            return true;
+        }
     }
 
     public boolean isGenerated() {
@@ -223,14 +257,40 @@ public class PartitionData {
         return landingPadControllers.remove(pos);
     }
 
+    /**
+     * Returns a defensive copy of the world positions of all engines tracked by this partition.
+     *
+     * <p>This method returns only the stored {@link BlockPos} locations of known engines,
+     * not the engine instances or their corresponding block entities. To interact with an
+     * engine, retrieve the block entity from the world using the returned positions.</p>
+     *
+     * <p>It is not guaranteed that an engine exists at every returned position. If changes
+     * fail to synchronize with this partition, the stored data may become inaccurate.
+     * Always verify that the block entity at a given position is an engine before use.</p>
+     *
+     * <p>The returned list is a defensive copy and may be modified without affecting the
+     * underlying partition data. To persist changes, use {@code setEngines(...)}.</p>
+     *
+     * @return a mutable list containing the tracked engine positions
+     */
     public List<BlockPos> getEngines() {
-        return engines;
+        return new ArrayList<>(engines);
     }
 
     public void setEngines(List<BlockPos> engines) {
         this.engines = engines;
     }
 
+    /**
+     * Adds an engine at the specified world position.
+     *
+     * <p>If an engine does not already exist at the given position, it is added
+     * to the internal collection and the method returns {@code true}. If an engine
+     * is already present at that position, no changes are made.</p>
+     *
+     * @param pos the world position of the engine to add
+     * @return {@code true} if the engine was added, {@code false} if it already existed
+     */
     public boolean addEngine(BlockPos pos) {
         if (!engines.contains(pos)) {
             engines.add(pos);

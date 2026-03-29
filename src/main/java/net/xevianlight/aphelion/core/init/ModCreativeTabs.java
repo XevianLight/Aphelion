@@ -28,6 +28,7 @@ public class ModCreativeTabs {
                         output.accept(ModItems.INGOT_NEODYMIUM);
                         output.accept(ModItems.INGOT_IRIDIUM);
                         output.accept(ModFluids.OIL_BUCKET);
+                        output.accept(ModFluids.ROCKET_FUEL_BUCKET);
                         output.accept(ModItems.MUSIC_DISC_BIT_SHIFT);
                     }).build());
 

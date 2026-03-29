@@ -24,13 +24,29 @@ public class ModFluids {
     public static final DeferredRegister<Fluid> FLUIDS =
             DeferredRegister.create(BuiltInRegistries.FLUID, Aphelion.MOD_ID);
 
+    public static final Supplier<FlowingFluid> ROCKET_FUEL = FLUIDS.register("rocket_fuel",
+            () -> new BaseFlowingFluid.Source(ModFluids.ROCKET_FUEL_PROPERTIES));
+    public static final Supplier<FlowingFluid> FLOWING_ROCKET_FUEL = FLUIDS.register("flowing_rocket_fuel",
+            () -> new BaseFlowingFluid.Flowing(ModFluids.ROCKET_FUEL_PROPERTIES));
+
+    public static final DeferredBlock<LiquidBlock> ROCKET_FUEL_BLOCK = ModBlocks.BLOCKS.register("rocket_fuel",
+        () -> new LiquidBlock(ModFluids.ROCKET_FUEL.get(), BlockBehaviour.Properties.ofFullCopy(Blocks.WATER).noLootTable()));
+
+    public static final DeferredItem<Item> ROCKET_FUEL_BUCKET = ModItems.ITEMS.registerItem("rocket_fuel_bucket",
+            properties -> new BucketItem(ModFluids.ROCKET_FUEL.get(), properties.stacksTo(1).craftRemainder(Items.BUCKET)));
+
+    public static final BaseFlowingFluid.Properties ROCKET_FUEL_PROPERTIES = new BaseFlowingFluid.Properties(
+            ModFluidTypes.ROCKET_FUEL_FLUID_TYPE, ROCKET_FUEL, FLOWING_ROCKET_FUEL)
+            .slopeFindDistance(2).levelDecreasePerBlock(2).tickRate(10)
+            .block(ModFluids.ROCKET_FUEL_BLOCK).bucket(ModFluids.ROCKET_FUEL_BUCKET);
+
     public static final Supplier<FlowingFluid> OIL = FLUIDS.register("oil",
             () -> new BaseFlowingFluid.Source(ModFluids.OIL_PROPERTIES));
     public static final Supplier<FlowingFluid> FLOWING_OIL = FLUIDS.register("flowing_oil",
             () -> new BaseFlowingFluid.Flowing(ModFluids.OIL_PROPERTIES));
 
     public static final DeferredBlock<LiquidBlock> OIL_BLOCK = ModBlocks.BLOCKS.register("oil",
-        () -> new LiquidBlock(ModFluids.OIL.get(), BlockBehaviour.Properties.ofFullCopy(Blocks.WATER).noLootTable()));
+            () -> new LiquidBlock(ModFluids.OIL.get(), BlockBehaviour.Properties.ofFullCopy(Blocks.WATER).noLootTable()));
 
     public static final DeferredItem<Item> OIL_BUCKET = ModItems.ITEMS.registerItem("oil_bucket",
             properties -> new BucketItem(ModFluids.OIL.get(), properties.stacksTo(1).craftRemainder(Items.BUCKET)));

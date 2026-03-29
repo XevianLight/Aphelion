@@ -6,6 +6,7 @@ import net.minecraft.data.tags.FluidTagsProvider;
 import net.minecraft.tags.FluidTags;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import net.xevianlight.aphelion.Aphelion;
+import net.xevianlight.aphelion.core.init.ModFluidTags;
 import net.xevianlight.aphelion.fluid.ModFluids;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,5 +23,7 @@ public class ModFluidTagsProvider extends FluidTagsProvider {
 //        tag(FluidTags.LAVA)
 //                .add(ModFluids.SOURCE_OIL_FLUID.get())
 //                .add(ModFluids.FLOWING_OIL_FLUID.get());
+        tag(ModFluidTags.ROCKET_FUEL)
+                .add(ModFluids.ROCKET_FUEL.get());
     }
 }

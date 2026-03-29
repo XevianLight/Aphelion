@@ -6,6 +6,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.xevianlight.aphelion.Aphelion;
 import net.xevianlight.aphelion.util.registries.ModRegistries;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,6 +18,7 @@ public final class PlanetCache {
 
     public static final Planet DEFAULT = new Planet(
             ResourceKey.create(Registries.DIMENSION, ResourceLocation.withDefaultNamespace("overworld")),
+            ResourceKey.create(ModRegistries.ORBIT, Aphelion.id("orbit/overworld")),
             1,
             ResourceKey.create(ModRegistries.STAR_SYSTEM, Aphelion.id("sol")),
             true,
@@ -46,6 +48,17 @@ public final class PlanetCache {
 
     public static Planet getOrDefault(ResourceLocation id) {
         return PLANETS.getOrDefault(id, DEFAULT);
+    }
+
+    public static @Nullable Planet getOrNull(ResourceLocation id) {
+        return PLANETS.getOrDefault(id, null);
+    }
+
+    public static @Nullable Planet getByOrbitOrNull(ResourceLocation id) {
+        return PLANETS.values().stream()
+                .filter(planet -> planet.orbit().location().equals(id))
+                .findFirst()
+                .orElse(null);
     }
 
     public static Planet getByDimensionOrNull(ResourceKey<Level> dimension) {

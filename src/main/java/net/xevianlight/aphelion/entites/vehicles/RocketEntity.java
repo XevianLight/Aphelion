@@ -44,6 +44,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.UUID;
 
 public class RocketEntity extends VehicleEntity implements IEntityWithComplexSpawn {
 
@@ -108,7 +109,6 @@ public class RocketEntity extends VehicleEntity implements IEntityWithComplexSpa
         };
     }
 
-
     public static RocketEntity spawnRocket(Level level, BlockPos pos, RocketStructure structure) {
         if (level.isClientSide) return null;
 
@@ -122,12 +122,22 @@ public class RocketEntity extends VehicleEntity implements IEntityWithComplexSpa
                 0.0f
         );
 
-        rocket.setStructure(structure);
-        level.addFreshEntity(rocket);
+//        rocket.FUEL_TANK.setFluid(new FluidStack(ModFluids.OIL.get(), 1000));
+//        rocket.INVENTORY.setSize(rocket.INVENTORY.getSlots() + 1);
+//        rocket.INVENTORY.insertItem(0, new ItemStack(Items.DIAMOND, 1), false);
 
-        rocket.FUEL_TANK.setFluid(new FluidStack(ModFluids.OIL.get(), 1000));
-        rocket.INVENTORY.setSize(rocket.INVENTORY.getSlots() + 1);
-        rocket.INVENTORY.insertItem(0, new ItemStack(Items.DIAMOND, 1), false);
+        // Fully initialize structure and containers
+        rocket.setStructure(structure);
+
+        if (rocket.INVENTORY.getSlots() > 0)
+            rocket.INVENTORY.insertItem(0, new ItemStack(Items.DIAMOND), false);
+        if (rocket.FUEL_TANK.getCapacity() != 0)
+            rocket.FUEL_TANK.setFluid(new FluidStack(ModFluids.OIL.get(), 1000));
+        if (rocket.FLUID_STORAGE.getCapacity() != 0)
+            rocket.FLUID_STORAGE.setFluid(FluidStack.EMPTY);
+
+
+        level.addFreshEntity(rocket);
 
         return rocket;
     }
@@ -166,6 +176,9 @@ public class RocketEntity extends VehicleEntity implements IEntityWithComplexSpa
 
         if (!level().isClientSide) {
 
+            if (INVENTORY.getSlots() > 0)
+                INVENTORY.insertItem(0, new ItemStack(Items.DIAMOND, 1), false);
+
             switch (getPhase()) {
                 case IDLE, LANDED -> tickIdle();
                 case PREPARE -> tickPrepare();
@@ -184,7 +197,10 @@ public class RocketEntity extends VehicleEntity implements IEntityWithComplexSpa
 
         }
 
-        move(MoverType.SELF, getDeltaMovement());
+        // Catch ANY edge cases which may cause a crash trying to move an entity as its chunk is unloading
+        if (!this.isRemoved() && this.isAlive() && level().hasChunkAt(blockPosition())) {
+            move(MoverType.SELF, getDeltaMovement());
+        }
     }
 
     private void tickIdle() {
@@ -393,7 +409,7 @@ public class RocketEntity extends VehicleEntity implements IEntityWithComplexSpa
         if (tag.contains("RocketStructure")) {
             CompoundTag rocketTag = tag.getCompound("RocketStructure");
             structure.load(rocketTag);
-            recalculateCapacitiesFromStructure();
+//            recalculateCapacitiesFromStructure();
 
             // Immediately apply correct bbox on load (server + client)
             double x = getX(), y = getY(), z = getZ();
@@ -590,6 +606,7 @@ public class RocketEntity extends VehicleEntity implements IEntityWithComplexSpa
     public boolean disassemble() {
         if (level().isClientSide) return false;
         if (!(level() instanceof ServerLevel server)) return false;
+        Aphelion.LOGGER.info("Disassemble called for rocket: " + getId());
 
         // In rare instances we can disassemble a rocket AFTER it has been killed.
         // This usually only happens if another class instance still has a reference to this object stored and calls rocketEntity.disassemble().

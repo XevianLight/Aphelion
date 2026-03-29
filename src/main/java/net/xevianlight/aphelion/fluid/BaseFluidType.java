@@ -7,7 +7,11 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.neoforged.neoforge.common.SoundAction;
+import net.neoforged.neoforge.common.SoundActions;
 import net.neoforged.neoforge.fluids.FluidType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -51,6 +55,17 @@ public class BaseFluidType extends FluidType {
         this.fogColor = fogColor;
         this.fogStart = fogStart;
         this.fogEnd = fogEnd;
+    }
+
+    @Override
+    public @Nullable SoundEvent getSound(SoundAction action) {
+        if (action == SoundActions.BUCKET_FILL) {
+            return SoundEvents.BUCKET_FILL;
+        }
+        if (action == SoundActions.BUCKET_EMPTY) {
+            return SoundEvents.BUCKET_EMPTY;
+        }
+        return super.getSound(action);
     }
 
     public IClientFluidTypeExtensions getClientFluidTypeExtensions() {
