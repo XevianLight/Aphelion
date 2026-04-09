@@ -54,8 +54,8 @@ public class StationRocketEngineBlockEntity extends StationEngineBlockEntity {
 
         if (data.getDestination() != null && data.isTraveling()) {
             if (!tank.isEmpty() && tank.getFluid().is(ModFluidTags.ROCKET_FUEL) && tank.getFluidAmount() >= FUEL_CONSUMPTION) { // has enough fuel?
-                if (data.travel(getTravelSpeed()))
-                    tank.drain(FUEL_CONSUMPTION, IFluidHandler.FluidAction.EXECUTE);
+                data.travel(getTravelSpeed());
+                tank.drain(FUEL_CONSUMPTION, IFluidHandler.FluidAction.EXECUTE);
             } else {
                 // not enough fuel
             }

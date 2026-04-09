@@ -11,6 +11,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.xevianlight.aphelion.Aphelion;
 import net.xevianlight.aphelion.core.saveddata.types.PartitionData;
+import net.xevianlight.aphelion.core.saveddata.types.PosData;
 import net.xevianlight.aphelion.util.SpacePartition;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -74,6 +75,14 @@ public class SpacePartitionSavedData extends SavedData {
                 pd.setLandingPadContollersFromArray(e.getLongArray("LandingPads"));
             }
 
+            if (e.contains("PosData", CompoundTag.TAG_LONG)) {
+                pd.setPosData(PosData.unpacker(e.getLong("PosData")));
+            }
+
+            if (e.contains("OrbitDistance", CompoundTag.TAG_DOUBLE)) {
+                pd.setOrbitDistance(e.getDouble("OrbitDistance"));
+            }
+
             data.map.put(key, pd);
         }
 
@@ -114,6 +123,10 @@ public class SpacePartitionSavedData extends SavedData {
             e.putBoolean("Generated", pd.isGenerated());
 
             e.putLongArray("LandingPads", pd.getLandingPadContollersAsArray());
+
+            e.putLong("PosData", pd.getPosDataOrDefault().pack());
+
+            e.putDouble("OrbitDistance", pd.getOrbitDistance());
 
             entries.add(e);
         });
@@ -178,10 +191,11 @@ public class SpacePartitionSavedData extends SavedData {
         if (data == null) {
 
             // pick a sensible default orbit, or null if you truly allow it
-            data = new PartitionData(Aphelion.id("orbit/default"));
+            data = new PartitionData(Aphelion.id("orbit/unassigned"));
             map.put(key, data);
             setDirty();
         }
+        data.setDirtyCallback(this::setDirty);
         return data;
     }
 
@@ -210,6 +224,7 @@ public class SpacePartitionSavedData extends SavedData {
             map.put(key, data);
             setDirty();
         }
+        data.setDirtyCallback(this::setDirty);
         return data;
     }
 
@@ -237,6 +252,7 @@ public class SpacePartitionSavedData extends SavedData {
             map.put(key, data);
             setDirty();
         }
+        data.setDirtyCallback(this::setDirty);
         return data;
     }
 

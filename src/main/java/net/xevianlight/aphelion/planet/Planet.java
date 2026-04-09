@@ -7,13 +7,16 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import net.xevianlight.aphelion.util.registries.ModRegistries;
 
+import java.util.Optional;
+
 public record Planet (
         ResourceKey<Level> dimension,
         ResourceKey<Orbit> orbit,
         double orbitDistance,
         ResourceKey<StarSystem> system,
         boolean oxygen,
-        float gravity
+        float gravity,
+        Optional<ResourceKey<Planet>> parentPlanet /// nullable moon parent
 ) {
     public static final Codec<Planet> CODEC = RecordCodecBuilder.create(inst -> inst.group(
             ResourceKey.codec(Registries.DIMENSION).fieldOf("dimension").forGetter(Planet::dimension),
@@ -21,7 +24,8 @@ public record Planet (
             Codec.DOUBLE.fieldOf("orbit_distance").forGetter(Planet::orbitDistance),
             ResourceKey.codec(ModRegistries.STAR_SYSTEM).fieldOf("star_system").forGetter(Planet::system),
             Codec.BOOL.fieldOf("oxygen").forGetter(Planet::oxygen),
-            Codec.FLOAT.fieldOf("gravity").forGetter(Planet::gravity)
+            Codec.FLOAT.fieldOf("gravity").forGetter(Planet::gravity),
+            ResourceKey.codec(ModRegistries.PLANET).optionalFieldOf("parent_planet").forGetter(Planet::parentPlanet)
 
     ).apply(inst, Planet::new));
 }

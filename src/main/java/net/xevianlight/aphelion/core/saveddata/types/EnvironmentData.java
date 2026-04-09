@@ -2,8 +2,6 @@ package net.xevianlight.aphelion.core.saveddata.types;
 
 public record EnvironmentData (boolean oxygen, short temperature, float gravity){
 
-
-
     public static final boolean DEFAULT_OXYGEN = true;
     public static final short DEFAULT_TEMPERATURE = (short) 294.2611; // 70F
     public static final float DEFAULT_GRAVITY = 9.80665f; // 1G

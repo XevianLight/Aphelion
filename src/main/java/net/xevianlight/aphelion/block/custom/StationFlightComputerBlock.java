@@ -32,10 +32,22 @@ public class StationFlightComputerBlock extends BasicHorizontalEntityBlock {
 
     @Override
     protected void onRemove(BlockState state, @NotNull Level level, @NotNull BlockPos pos, BlockState newState, boolean movedByPiston) {
+        super.onRemove(state, level, pos, newState, movedByPiston);
         if (level.getBlockEntity(pos) instanceof StationFlightComputerBlockEntity computerBE) {
             PartitionData data = computerBE.getData();
             if (data != null) {
                 data.setTraveling(false);
+            }
+        }
+    }
+
+    @Override
+    protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
+        super.onPlace(state, level, pos, oldState, movedByPiston);
+        if (level.getBlockEntity(pos) instanceof StationFlightComputerBlockEntity computerBE) {
+            PartitionData data = computerBE.getData();
+            if (data != null) {
+                data.setTraveling(true);
             }
         }
     }

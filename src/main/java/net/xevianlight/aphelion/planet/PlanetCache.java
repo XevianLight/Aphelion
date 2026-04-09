@@ -6,15 +6,19 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.xevianlight.aphelion.Aphelion;
 import net.xevianlight.aphelion.util.registries.ModRegistries;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public final class PlanetCache {
 
     public static final Map<ResourceLocation, Planet> PLANETS = new HashMap<>();
     public static final Map<ResourceKey<Level>, ResourceLocation> PLANET_BY_DIMENSION = new HashMap<>();
+    public static final Map<ResourceLocation, Planet> PLANET_BY_ORBIT = new HashMap<>();
 
     public static final Planet DEFAULT = new Planet(
             ResourceKey.create(Registries.DIMENSION, ResourceLocation.withDefaultNamespace("overworld")),
@@ -22,7 +26,8 @@ public final class PlanetCache {
             1,
             ResourceKey.create(ModRegistries.STAR_SYSTEM, Aphelion.id("sol")),
             true,
-            1
+            1,
+            Optional.empty()
     );
 
     public static void registerPlanets(Map<ResourceLocation, Planet> planets) {
@@ -34,6 +39,7 @@ public final class PlanetCache {
         planets.forEach((planetId, planet) -> {
             var dim = planet.dimension();
             var prev = PLANET_BY_DIMENSION.put(dim, planetId);
+            PLANET_BY_ORBIT.put(planet.orbit().location(), planet);
             if (prev != null) {
                 Aphelion.LOGGER.warn(
                         "Dimension {} is claimed by multiple planets: {} and {}. Keeping latest: {}",
@@ -61,8 +67,27 @@ public final class PlanetCache {
                 .orElse(null);
     }
 
+    public static @NotNull Planet getByOrbitOrDefault(ResourceLocation id) {
+        return PLANETS.values().stream()
+                .filter(planet -> planet.orbit().location().equals(id))
+                .findFirst()
+                .orElse(DEFAULT);
+    }
+
     public static Planet getByDimensionOrNull(ResourceKey<Level> dimension) {
         ResourceLocation planetId = PLANET_BY_DIMENSION.get(dimension);
         return planetId == null ? null : PLANETS.get(planetId);
+    }
+
+    public static @NotNull List<Planet> getSatellites(ResourceLocation id) {
+        return PLANETS.values().stream()
+                .filter(planet -> planet.parentPlanet()
+                        .map(key -> key.location().equals(id))
+                        .orElse(false))
+                .toList();
+    }
+
+    public static @NotNull List<Planet> getSatellites(ResourceKey<Planet> key) {
+        return getSatellites(key.location());
     }
 }

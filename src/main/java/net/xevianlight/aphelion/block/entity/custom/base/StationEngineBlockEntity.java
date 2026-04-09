@@ -54,4 +54,11 @@ public abstract class StationEngineBlockEntity extends BlockEntity implements Ti
         }
         isInitialized = true;
     }
+
+    @Override
+    public void onRemoved() {
+        if (data != null)
+            data.removeEngine(worldPosition);
+        TickableBlockEntity.super.onRemoved();
+    }
 }

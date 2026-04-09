@@ -34,8 +34,15 @@ public final class PartitionSync {
 
             // If it is different, send them the new one
             if (prev == null || !prev.equals(now)) {
+                Aphelion.LOGGER.debug("Partition changed for {}: prev={} now={}", sp.getName().getString(),
+                        prev == null ? "null" : String.format("orbit=%s dest=%s traveling=%s distTraveled=%s tripDist=%s orbitDist=%s",
+                                prev.partitionData().getOrbit(), prev.partitionData().getDestination(), prev.partitionData().isTraveling(),
+                                prev.partitionData().getDistanceTraveledAU(), prev.partitionData().getTripDistanceAU(), prev.partitionData().getOrbitDistance()),
+                        String.format("orbit=%s dest=%s traveling=%s distTraveled=%s tripDist=%s orbitDist=%s",
+                                now.partitionData().getOrbit(), now.partitionData().getDestination(), now.partitionData().isTraveling(),
+                                now.partitionData().getDistanceTraveledAU(), now.partitionData().getTripDistanceAU(), now.partitionData().getOrbitDistance())
+                );
                 PacketDistributor.sendToPlayer(sp, now);
-                // Store this packet for later
                 LAST_SENT.put(sp.getUUID(), now);
             }
         }

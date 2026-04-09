@@ -28,8 +28,6 @@ public class StationFlightComputerBlockEntity extends BlockEntity implements Tic
 
     @Override
     public void serverTick(ServerLevel level, long time, BlockState state, BlockPos pos) {
-        if (data == null) return;
-        data.setTraveling(true);
     }
 
     public @Nullable PartitionData getData() {
@@ -42,7 +40,7 @@ public class StationFlightComputerBlockEntity extends BlockEntity implements Tic
         if (level instanceof ServerLevel serverLevel) {
             if (serverLevel.dimension() == ModDimensions.SPACE) {
                 data = SpacePartitionSavedData.get(serverLevel).getDataForBlockPos(pos);
-
+                setTraveling(true);
             }
         }
         isInitialized = true;
