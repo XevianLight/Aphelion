@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd /tmp)",
+      "Bash(jar -xf \"C:/Users/Xevian/.gradle/caches/modules-2/files-2.1/net.neoforged/neoforge/21.1.217/f8798213b260c83be365a3d8ec5537d36dd44d1c/neoforge-21.1.217-sources.jar\" \"net/neoforged/neoforge/common/extensions/IPlayerExtension.java\")",
+      "Read(//tmp/**)"
+    ]
+  }
+}

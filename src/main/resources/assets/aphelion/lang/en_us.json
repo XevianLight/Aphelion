@@ -32,6 +32,7 @@
   "entity.aphelion.rocket": "Rocket",
 
   "fluid_type.aphelion.oil": "Oil",
+  "fluid_type.aphelion.rocket_fuel": "Rocket Fuel",
 
 
   "command.aphelion.station.orbit.set": "Set station (%s, %s)'s orbit to %s",
@@ -59,5 +60,7 @@
   "command.aphelion.station.owner.unset": "Station has no owner",
   "command.aphelion.station.owner.get": "Station (%s %s) belongs to %s",
   "command.aphelion.station.owner.set.success": "Set station (%s %s)'s owner to %s",
-  "command.aphelion.player.invalid": "Player is invalid"
+  "command.aphelion.player.invalid": "Player is invalid",
+
+  "block.aphelion.station_flight_computer": "Station Flight Computer"
 }

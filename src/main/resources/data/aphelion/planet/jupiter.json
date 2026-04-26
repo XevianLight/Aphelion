@@ -1,0 +1,8 @@
+{
+  "dimension": "aphelion:jupiter",
+  "orbit": "aphelion:orbit/jupiter",
+  "orbit_distance": 5.203,
+  "star_system": "aphelion:sol",
+  "gravity": 2.528,
+  "oxygen": false
+}

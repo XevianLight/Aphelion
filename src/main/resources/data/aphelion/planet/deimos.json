@@ -1,0 +1,9 @@
+{
+  "dimension": "aphelion:space",
+  "orbit": "aphelion:orbit/deimos",
+  "orbit_distance": 0.000157,
+  "star_system": "aphelion:sol",
+  "gravity": 0.003,
+  "oxygen": false,
+  "parent_planet": "aphelion:mars"
+}

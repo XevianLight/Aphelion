@@ -1,0 +1,8 @@
+{
+  "dimension": "aphelion:mercury",
+  "orbit": "aphelion:orbit/mercury",
+  "orbit_distance": 0.387,
+  "star_system": "aphelion:sol",
+  "gravity": 0.38,
+  "oxygen": false
+}

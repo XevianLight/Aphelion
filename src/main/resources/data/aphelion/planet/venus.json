@@ -1,0 +1,8 @@
+{
+  "dimension": "aphelion:venus",
+  "orbit": "aphelion:orbit/venus",
+  "orbit_distance": 0.723,
+  "star_system": "aphelion:sol",
+  "gravity": 0.905,
+  "oxygen": false
+}

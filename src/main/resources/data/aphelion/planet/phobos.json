@@ -1,0 +1,9 @@
+{
+  "dimension": "aphelion:space",
+  "orbit": "aphelion:orbit/phobos",
+  "orbit_distance": 0.0000627,
+  "star_system": "aphelion:sol",
+  "gravity": 0.0057,
+  "oxygen": false,
+  "parent_planet": "aphelion:mars"
+}

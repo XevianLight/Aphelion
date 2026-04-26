@@ -1,8 +1,8 @@
 {
   "dimension": "aphelion:mars",
   "orbit": "aphelion:orbit/mars",
-  "orbit_distance": 1.5,
+  "orbit_distance": 1.524,
   "star_system": "aphelion:sol",
-  "gravity": 1,
+  "gravity": 0.379,
   "oxygen": false
 }

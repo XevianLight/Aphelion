@@ -15,10 +15,14 @@ import net.xevianlight.aphelion.block.entity.custom.TestBlockEntity;
 import net.xevianlight.aphelion.block.entity.custom.VacuumArcFurnaceControllerEntity;
 import net.xevianlight.aphelion.core.init.ModBlockEntities;
 import net.xevianlight.aphelion.core.init.ModEntities;
+import net.xevianlight.aphelion.network.FlightComputerPayloadHandler;
 import net.xevianlight.aphelion.network.RocketPayloadHandlers;
 import net.xevianlight.aphelion.network.PartitionPayloadHandler;
+import net.xevianlight.aphelion.network.packet.AvailableDestinationsPayload;
 import net.xevianlight.aphelion.network.packet.PartitionPayload;
 import net.xevianlight.aphelion.network.packet.RocketLaunchPayload;
+import net.xevianlight.aphelion.network.packet.SetDestinationPayload;
+import net.xevianlight.aphelion.network.packet.SetTravelingPayload;
 
 @EventBusSubscriber(modid = Aphelion.MOD_ID)
 public class ModBusEvents {
@@ -56,6 +60,24 @@ public class ModBusEvents {
                 RocketLaunchPayload.TYPE,
                 RocketLaunchPayload.STREAM_CODEC,
                 RocketPayloadHandlers::handleRocketLaunch
+        );
+
+        registrar.playToClient(
+                AvailableDestinationsPayload.TYPE,
+                AvailableDestinationsPayload.STREAM_CODEC,
+                FlightComputerPayloadHandler::handleAvailableDestinations
+        );
+
+        registrar.playToServer(
+                SetDestinationPayload.TYPE,
+                SetDestinationPayload.STREAM_CODEC,
+                FlightComputerPayloadHandler::handleSetDestination
+        );
+
+        registrar.playToServer(
+                SetTravelingPayload.TYPE,
+                SetTravelingPayload.STREAM_CODEC,
+                FlightComputerPayloadHandler::handleSetTraveling
         );
 
     }

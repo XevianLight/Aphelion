@@ -1,0 +1,8 @@
+{
+  "dimension": "aphelion:neptune",
+  "orbit": "aphelion:orbit/neptune",
+  "orbit_distance": 30.069,
+  "star_system": "aphelion:sol",
+  "gravity": 1.148,
+  "oxygen": false
+}

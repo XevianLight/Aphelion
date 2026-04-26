@@ -1,0 +1,9 @@
+{
+  "dimension": "aphelion:space",
+  "orbit": "aphelion:orbit/luna",
+  "orbit_distance": 0.00257,
+  "star_system": "aphelion:sol",
+  "gravity": 0.165,
+  "oxygen": false,
+  "parent_planet": "aphelion:earth"
+}
